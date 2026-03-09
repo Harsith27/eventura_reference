@@ -1,0 +1,1508 @@
+EVENTURA COLLABORATION MASTER PLAN
+Version: 2.0
+Date: 2026-03-09
+Workspace Root: c:/eventura_workspace/eventura
+Reference Project Root: c:/eventura_workspace/eventura_reference
+
+PURPOSE
+1. This document defines how the 6-member team will collaboratively rebuild Eventura in the fresh eventura folder using the completed eventura_reference project as the implementation reference.
+2. This plan is intended to support real collaboration, real commits, real merges, and real feature ownership.
+3. This plan also gives a defendable explanation for module ownership, folder responsibility, merge order, integration sequence, and commit distribution.
+4. This plan must remain aligned with actual work done in the repository.
+5. This plan must not be used to fabricate authorship or fake contributions.
+
+TEAM MEMBERS
+1. Harsith - module/auth
+2. Naren - module/user-registration
+3. Shree - module/create-event
+4. Kabhilesh - module/dashboard
+5. Mukhil - module/analytics
+6. Vandhan - module/explore-events
+
+MODULE SUMMARY
+1. Harsith owns auth module, homepage, navbar auth state, logout, login pages, signup pages, superadmin login, organizer/admin request access, and request approval mail flow.
+2. Naren owns student registration flow, registration confirmation mail, registration page, attendance page, manual attendance flow, and QR attendance flow.
+3. Shree owns organizer-side create event flow, edit event flow, and organizer event showcase page.
+4. Kabhilesh owns dashboards: student/organizer dashboard, admin dashboard, and superadmin dashboard.
+5. Mukhil owns analytics pages, analytics APIs, metrics cards, chart views, and future report export backlog.
+6. Vandhan owns explore events, browse and filter flow, profile page, edit profile flow, and profile data compatibility for registration prefill.
+
+BRANCH MODEL
+1. main
+2. dev
+3. module/auth
+4. module/user-registration
+5. module/create-event
+6. module/dashboard
+7. module/analytics
+8. module/explore-events
+
+HIGH-LEVEL RULES
+1. All module branches are created from dev.
+2. main receives code only from stabilized dev.
+3. Team uses merge commits, not rebase.
+4. All contributors pull latest dev before starting feature work each day.
+5. Shared file changes must be announced in team chat before merge.
+6. Prisma schema changes require explicit coordination.
+7. Route-level integration changes require smoke testing before merge.
+8. Root cleanup happens near release, not during early migration.
+9. Every member keeps commits small, meaningful, and scoped to one logical change.
+10. Commit history should reflect actual work done.
+
+REAL-WORK INTEGRITY RULES
+1. Each contributor must commit only work they actually performed.
+2. Commit author names must match the actual contributor.
+3. Commit dates must reflect the actual time of work or a legitimate recorded team workflow.
+4. Do not invent fake merge conflicts just for appearance.
+5. If conflicts occur naturally, resolve them properly and keep the merge commit.
+6. If demo requires history explanation, use true collaboration evidence.
+
+PROJECT GOALS
+1. Recreate the full Eventura application in the fresh eventura folder.
+2. Preserve the architecture and business flow of the reference project.
+3. Split code responsibilities clearly across the 6 branches.
+4. Keep services, lib, components, and app routes distributed across contributors.
+5. Keep the final repository clean and explainable.
+6. Keep image handling PostgreSQL-compatible.
+7. Support real merge-based collaboration without rebase.
+8. Produce understandable commit history and merge flow.
+
+IMAGE STORAGE REQUIREMENT
+1. Images must be handled in a PostgreSQL-compatible manner.
+2. Event banners must be stored using a database-compatible strategy.
+3. Profile images must be stored using a database-compatible strategy.
+4. Payment screenshots must be stored using a database-compatible strategy.
+5. The team must verify schema capacity for any long string or base64 approach.
+6. If URLs are used, they must point to data persisted through the app storage layer.
+7. Team must verify retrieval on all relevant pages.
+8. Team must verify edit/update behavior for image fields.
+
+ROOT CLEANUP GOAL
+1. The final project root should not contain unnecessary summary markdown or text files.
+2. Candidate files for later cleanup include temporary summaries, implementation notes, ad hoc logs, and redundant guides not required for delivery.
+3. README.md stays.
+4. package.json and configuration files stay.
+5. prisma folder stays.
+6. src folder stays.
+7. public folder stays.
+8. Required setup notes stay only if they are actually needed by the team.
+9. Cleanup happens after core integration is stable.
+
+SHARED FOLDER DISTRIBUTION
+1. src/components/Navbar.tsx - primary owner Harsith, reviewer Kabhilesh.
+2. src/components/Footer.tsx - primary owner Vandhan, reviewer Kabhilesh.
+3. src/components/ui - shared primitives; changes coordinated through Kabhilesh.
+4. src/lib/auth.ts - primary owner Harsith.
+5. src/lib/email.ts - primary owner Harsith, reviewer Naren.
+6. src/lib/prisma.ts - shared infrastructure owner Shree for schema coordination.
+7. src/lib/utils.ts - shared utility owner Vandhan.
+8. src/lib/validations.ts - shared contract owner Harsith with module-specific additions by all owners.
+9. src/services/admin.service.ts - primary owner Kabhilesh.
+10. src/services/analytics.service.ts - primary owner Mukhil.
+11. src/services/bookmark.service.ts - primary owner Vandhan.
+12. src/services/event.service.ts - primary owner Shree.
+13. src/services/notification.service.ts - primary owner Harsith, reviewer Naren.
+14. src/services/organiser.service.ts - primary owner Harsith, reviewer Kabhilesh.
+15. src/services/registration.service.ts - primary owner Naren.
+16. src/services/user.service.ts - primary owner Vandhan.
+17. prisma/schema.prisma - shared schema owners Shree and Naren for event/registration fields, Harsith for auth-related fields.
+
+MODULE OWNER TO FOLDER MAP
+1. Harsith owns src/app/login
+2. Harsith owns src/app/signup
+3. Harsith owns src/app/admin
+4. Harsith owns src/app/waiting-for-approval
+5. Harsith owns src/app/request-rejected
+6. Harsith owns src/app/api/auth
+7. Harsith owns src/app/api/contact
+8. Harsith owns src/app/api/organiser
+9. Harsith owns homepage auth state adjustments in src/app/page.tsx
+10. Harsith owns navbar auth actions in src/components/Navbar.tsx
+11. Naren owns src/app/events/[id]/register
+12. Naren owns src/app/events/[id]/attendance
+13. Naren owns src/app/organizer/scan-attendance
+14. Naren owns src/app/api/events/[id]/register
+15. Naren owns src/app/api/events/[id]/verify-attendance
+16. Naren owns src/app/api/events/[id]/attendance/mark
+17. Naren owns src/app/api/attendance/mark
+18. Naren owns registration confirmation notification hookup
+19. Shree owns src/app/events/create
+20. Shree owns organizer-facing event page state in src/app/events/[id]/page.tsx
+21. Shree owns event creation and edit APIs
+22. Shree owns event field schema alignment
+23. Kabhilesh owns src/app/dashboard
+24. Kabhilesh owns src/app/user
+25. Kabhilesh owns src/app/organizer/dashboard
+26. Kabhilesh owns src/app/admin/dashboard
+27. Kabhilesh owns src/app/superadmin/page.tsx dashboard section
+28. Mukhil owns src/app/events/[id]/analytics
+29. Mukhil owns src/app/api/events/[id]/analytics
+30. Mukhil owns src/app/superadmin/analytics
+31. Mukhil owns analytics chart packages and metrics wiring
+32. Vandhan owns src/app/browse
+33. Vandhan owns src/app/bookmarks
+34. Vandhan owns src/app/profile
+35. Vandhan owns src/app/settings
+36. Vandhan owns src/app/api/profile
+37. Vandhan owns explore filters and profile edit compatibility
+
+MERGE POLICY
+1. Members merge dev into their module branch daily or when dev changes affect their module.
+2. Members do not rebase module branches.
+3. Members push feature commits to their module branch.
+4. Integration merges happen from module branch into dev.
+5. Conflict resolution must preserve working logic from both sides where needed.
+6. Final release merge is dev into main.
+
+MERGE REVIEW POLICY
+1. Auth merges reviewed by Naren or Kabhilesh.
+2. Registration merges reviewed by Harsith or Shree.
+3. Create-event merges reviewed by Vandhan or Naren.
+4. Dashboard merges reviewed by Harsith or Mukhil.
+5. Analytics merges reviewed by Kabhilesh or Shree.
+6. Explore/profile merges reviewed by Naren or Kabhilesh.
+
+COMMIT TARGETS
+1. Harsith target commits: 15
+2. Naren target commits: 10
+3. Shree target commits: 10
+4. Kabhilesh target commits: 9
+5. Mukhil target commits: 9
+6. Vandhan target commits: 9
+
+COMMIT QUALITY RULES
+1. One commit per meaningful change.
+2. Avoid giant file dumps.
+3. Use module prefixes in messages.
+4. Keep integration fixes separate from feature additions.
+5. Keep merge commits visible.
+6. Keep conflict resolution commits explicit.
+
+COMMIT MESSAGE EXAMPLES
+1. auth: add login form validation and submit flow
+2. auth: implement superadmin login route
+3. auth: wire logout button in navbar
+4. auth: add organizer request approval email template
+5. reg: scaffold registration page with required fields
+6. reg: add registration confirmation mail trigger
+7. reg: implement QR attendance scanner page
+8. event: add event create form sections
+9. event: preload edit event form values
+10. dash: add organizer dashboard overview cards
+11. dash: add admin request summary panel
+12. analytics: add status breakdown chart
+13. analytics: add platform summary cards
+14. explore: add browse filter state
+15. profile: add edit profile form validation
+
+DELIVERY PHASES
+1. Phase 1 - Initial app bootstrap and baseline sync.
+2. Phase 2 - Module scaffold transfer from reference project.
+3. Phase 3 - Core business flows by owner.
+4. Phase 4 - Cross-module integration.
+5. Phase 5 - Merge conflict handling.
+6. Phase 6 - QA, cleanup, and release.
+
+PHASE 1 OBJECTIVES
+1. Confirm Next.js base project exists in fresh eventura folder.
+2. Confirm dependencies align with reference app.
+3. Confirm Prisma schema is available.
+4. Confirm all contributors can run the app locally.
+5. Confirm route tree plan is known.
+6. Confirm module branches are created.
+7. Confirm services/lib/components ownership is agreed.
+8. Confirm commit strategy is agreed.
+
+PHASE 2 OBJECTIVES
+1. Transfer auth scaffolds.
+2. Transfer registration scaffolds.
+3. Transfer create-event scaffolds.
+4. Transfer dashboard scaffolds.
+5. Transfer analytics scaffolds.
+6. Transfer explore/profile scaffolds.
+7. Keep shared files coordinated.
+
+PHASE 3 OBJECTIVES
+1. Finish login and signup.
+2. Finish request access workflow.
+3. Finish event registration flow.
+4. Finish create/edit event flow.
+5. Finish dashboard summaries.
+6. Finish analytics visualizations.
+7. Finish explore/profile flow.
+
+PHASE 4 OBJECTIVES
+1. Integrate auth with middleware and dashboards.
+2. Integrate profile data with registration prefill.
+3. Integrate create-event output with explore and analytics.
+4. Integrate registration output with attendance.
+5. Integrate request approvals with superadmin dashboard.
+
+PHASE 5 OBJECTIVES
+1. Merge modules into dev in staged order.
+2. Resolve conflicts in shared files.
+3. Re-test after each merge.
+4. Preserve merge commits.
+
+PHASE 6 OBJECTIVES
+1. Remove unnecessary root files.
+2. Finalize README if needed.
+3. Validate DB image handling.
+4. Validate all role flows.
+5. Merge dev to main.
+
+DAY-WISE EXECUTION PLAN
+Day 1 Goal: bootstrap, branch creation, and ownership mapping.
+Day 2 Goal: auth and registration scaffold transfer.
+Day 3 Goal: create-event and explore scaffold transfer.
+Day 4 Goal: dashboard and analytics scaffold transfer.
+Day 5 Goal: auth features and mail workflow.
+Day 6 Goal: registration and attendance workflow.
+Day 7 Goal: create/edit event completion.
+Day 8 Goal: dashboards role-aware integration.
+Day 9 Goal: analytics event-level completion.
+Day 10 Goal: profile, bookmarks, and explore refinement.
+Day 11 Goal: cross-module integration pass 1.
+Day 12 Goal: cross-module integration pass 2 plus conflict handling.
+Day 13 Goal: QA and bug fixes.
+Day 14 Goal: root cleanup and documentation pass.
+Day 15 Goal: final dev stabilization and merge to main.
+
+DAY 1 - HARSITH
+1. Pull latest dev into module/auth.
+2. Create auth route checklist from reference app.
+3. Identify login page dependencies.
+4. Identify signup page dependencies.
+5. Identify superadmin login route dependencies.
+6. Identify request access page dependencies.
+7. Identify navbar auth-dependent links.
+8. Identify logout flow requirements.
+9. Identify auth API routes required for baseline.
+10. Identify email templates needed for request access flow.
+
+DAY 1 - NAREN
+11. Pull latest dev into module/user-registration.
+12. Identify event registration page dependencies.
+13. Identify API dependencies for registration submit.
+14. Identify QR code generation dependencies.
+15. Identify attendance page dependencies.
+16. Identify manual attendance mark flow requirements.
+17. Identify QR attendance mark flow requirements.
+18. Identify registration confirmation notification hooks.
+19. Identify registration custom field parsing dependencies.
+20. Identify registration prefill dependencies from profile.
+
+DAY 1 - SHREE
+21. Pull latest dev into module/create-event.
+22. Identify create event page dependencies.
+23. Identify event edit page dependencies.
+24. Identify event showcase page dependencies.
+25. Identify event API requirements.
+26. Identify event schema fields required.
+27. Identify image upload handling required for events.
+28. Identify tag/category dependencies.
+29. Identify registration source configuration needs.
+30. Identify event code or short-link support dependencies.
+
+DAY 1 - KABHILESH
+31. Pull latest dev into module/dashboard.
+32. Identify student dashboard dependencies.
+33. Identify organizer dashboard dependencies.
+34. Identify admin dashboard dependencies.
+35. Identify superadmin dashboard dependencies.
+36. Identify dashboard summary API requirements.
+37. Identify shared dashboard UI primitives required.
+38. Identify role-gated route dependencies.
+39. Identify quick actions and cards required.
+40. Identify pending request counters required.
+
+DAY 1 - MUKHIL
+41. Pull latest dev into module/analytics.
+42. Identify event analytics page dependencies.
+43. Identify analytics API dependencies.
+44. Identify chart library requirements.
+45. Identify metric card requirements.
+46. Identify superadmin analytics requirements.
+47. Identify event-level registrations and status data needed.
+48. Identify future report export requirements.
+49. Identify shared date range and filter needs.
+50. Identify analytics routing links from event and dashboard pages.
+
+DAY 1 - VANDHAN
+51. Pull latest dev into module/explore-events.
+52. Identify browse page dependencies.
+53. Identify bookmarks dependencies.
+54. Identify profile page dependencies.
+55. Identify edit profile dependencies.
+56. Identify profile API dependencies.
+57. Identify explore search and filter needs.
+58. Identify event card component needs.
+59. Identify profile data fields needed for prefill support.
+60. Identify settings page dependencies.
+
+DAY 2 - HARSITH
+61. Add baseline auth layout imports.
+62. Add login page shell.
+63. Add signup page shell.
+64. Add superadmin login shell.
+65. Add request access page shell.
+66. Add logout action placeholder.
+67. Add navbar auth-state placeholder logic.
+68. Add auth API route skeletons.
+69. Add email helper baseline if missing.
+70. Commit auth scaffold transfer.
+
+DAY 2 - NAREN
+71. Add registration page shell.
+72. Add registration form basic state.
+73. Add event registration API route skeleton.
+74. Add QR data helper placeholder.
+75. Add attendance page shell.
+76. Add manual attendance form placeholder.
+77. Add QR attendance scanner placeholder.
+78. Add registration service skeleton.
+79. Add confirmation mail placeholder link point.
+80. Commit registration scaffold transfer.
+
+DAY 2 - SHREE
+81. Add create event page shell.
+82. Add event form sections baseline.
+83. Add edit event state shell.
+84. Add event API skeleton.
+85. Add organizer event page shell.
+86. Add image input placeholder.
+87. Add team settings placeholder fields.
+88. Add registration source placeholder fields.
+89. Add event service baseline.
+90. Commit create-event scaffold transfer.
+
+DAY 2 - KABHILESH
+91. Add dashboard shell layout.
+92. Add student dashboard placeholder sections.
+93. Add organizer dashboard placeholder sections.
+94. Add admin dashboard placeholder sections.
+95. Add superadmin dashboard placeholder sections.
+96. Add dashboard summary service baseline.
+97. Add dashboard cards placeholder UI.
+98. Add role-specific route placeholders.
+99. Add empty states for each dashboard.
+100. Commit dashboard scaffold transfer.
+
+DAY 2 - MUKHIL
+101. Add event analytics page shell.
+102. Add analytics API skeleton.
+103. Add chart package wiring.
+104. Add analytics cards placeholder UI.
+105. Add event chart placeholder components.
+106. Add superadmin analytics page shell.
+107. Add analytics service baseline.
+108. Add no-data states.
+109. Add route links placeholder references.
+110. Commit analytics scaffold transfer.
+
+DAY 2 - VANDHAN
+111. Add browse page shell.
+112. Add profile page shell.
+113. Add edit profile form shell.
+114. Add profile API route skeleton.
+115. Add bookmarks page shell.
+116. Add event card baseline component or page usage.
+117. Add search bar placeholder.
+118. Add filter panel placeholder.
+119. Add settings shell.
+120. Commit explore/profile scaffold transfer.
+
+DAY 3 - HARSITH
+121. Implement login form validation.
+122. Implement signup form validation.
+123. Implement auth API submit handling.
+124. Implement password hashing integration.
+125. Implement JWT generation helper usage.
+126. Implement auth cookie set flow.
+127. Implement logout endpoint.
+128. Implement logout button action in navbar.
+129. Fix login redirect behavior by role.
+130. Commit login-signup core flow.
+
+DAY 3 - NAREN
+131. Parse event custom fields into registration form.
+132. Add required-field validation.
+133. Add default registration fields.
+134. Add registration submit request.
+135. Handle API success state.
+136. Handle API error state.
+137. Add confirmation message or redirect behavior.
+138. Add QR popup baseline behavior if needed.
+139. Add prefill mapping hooks.
+140. Commit registration basic flow.
+
+DAY 3 - SHREE
+141. Implement event basic fields in create page.
+142. Implement date/time input handling.
+143. Implement venue/location fields.
+144. Implement capacity fields.
+145. Implement registration mode fields.
+146. Implement team requirement fields.
+147. Implement event code or short route field handling if needed.
+148. Implement create API submit flow.
+149. Handle create success redirect.
+150. Commit create event basic flow.
+
+DAY 3 - KABHILESH
+151. Add dashboard summary fetch flow.
+152. Implement student dashboard card layout.
+153. Implement organizer dashboard card layout.
+154. Implement admin dashboard request summary.
+155. Implement superadmin dashboard request/user summary.
+156. Add dashboard loading states.
+157. Add dashboard error states.
+158. Add shared dashboard section component usage.
+159. Add basic responsive behavior.
+160. Commit dashboard basic flow.
+
+DAY 3 - MUKHIL
+161. Fetch analytics data from event analytics API.
+162. Map total registrations card.
+163. Map capacity card.
+164. Map available slots card.
+165. Map attendance rate card.
+166. Add status breakdown chart dataset.
+167. Add college distribution chart dataset.
+168. Add timeline chart dataset.
+169. Add registrations table baseline.
+170. Commit event analytics basic flow.
+
+DAY 3 - VANDHAN
+171. Fetch browse events list.
+172. Add event cards grid.
+173. Add search filter logic.
+174. Add basic category/tag filter logic.
+175. Add profile fetch logic.
+176. Add edit profile form state.
+177. Add settings page basic sections.
+178. Add bookmarks list baseline.
+179. Add event navigation from browse.
+180. Commit explore/profile basic flow.
+
+DAY 4 - HARSITH
+181. Implement superadmin login submit flow.
+182. Implement organizer request access submit flow.
+183. Implement request access API validation.
+184. Implement request access email to superadmin.
+185. Implement request status page state.
+186. Add approval/rejection state page support.
+187. Align middleware with auth routes.
+188. Align navbar with auth role state.
+189. Verify logout clears auth cookie.
+190. Commit auth admin/superadmin flow.
+
+DAY 4 - NAREN
+191. Implement registration confirmation notification trigger.
+192. Implement registration confirmation email flow hook.
+193. Implement attendance page registration fetch.
+194. Implement manual mark attendance submit.
+195. Implement attendance mark API.
+196. Implement mark success feedback.
+197. Implement already-marked handling.
+198. Implement QR scan submit flow.
+199. Implement QR verify API call.
+200. Commit attendance basic flow.
+
+DAY 4 - SHREE
+201. Implement edit event preload logic.
+202. Implement edit event update submit flow.
+203. Implement organizer event page fetch logic.
+204. Implement event image display area.
+205. Implement tags/category display.
+206. Implement registration source display behavior.
+207. Implement organizer action buttons.
+208. Implement event deletion guard if needed.
+209. Align event page route parameters.
+210. Commit edit and organizer event flow.
+
+DAY 4 - KABHILESH
+211. Connect admin request panels to request data.
+212. Connect superadmin user panels to user data.
+213. Add dashboard navigation links.
+214. Add role-specific dashboard entry points.
+215. Add organizer quick links to create and my-events.
+216. Add student quick links to explore and bookmarks.
+217. Improve card spacing and typography.
+218. Improve dashboard responsiveness.
+219. Validate role visibility logic.
+220. Commit dashboard role integration.
+
+DAY 4 - MUKHIL
+221. Add superadmin analytics page basic metrics.
+222. Add total users metric.
+223. Add total events metric.
+224. Add total registrations metric.
+225. Add pending approvals metric.
+226. Add active organizers metric.
+227. Add chart placeholders for platform trends.
+228. Add no-data state messaging.
+229. Add analytics route links from dashboard.
+230. Commit superadmin analytics baseline.
+
+DAY 4 - VANDHAN
+231. Implement edit profile submit flow.
+232. Implement form validation for profile fields.
+233. Implement bookmark toggle flow.
+234. Implement profile completion support fields.
+235. Implement browse filter reset behavior.
+236. Improve event card metadata display.
+237. Add pagination or scroll behavior as needed.
+238. Align profile data with registration prefill fields.
+239. Validate profile save feedback.
+240. Commit profile and browse integration.
+
+DAY 5 - HARSITH
+241. Refine login error states.
+242. Refine signup error states.
+243. Refine middleware protected route list.
+244. Refine profile completion exemptions.
+245. Verify organizer pending flow.
+246. Verify organizer rejected flow.
+247. Verify superadmin session handling.
+248. Verify request access success mail content.
+249. Verify approval mail template handling.
+250. Commit auth refinement pass 1.
+
+DAY 5 - NAREN
+251. Refine registration API payload structure.
+252. Refine registration form validation messages.
+253. Refine attendance search behavior.
+254. Refine camera permission handling.
+255. Refine QR scan success handling.
+256. Refine attendance duplicate mark behavior.
+257. Refine registration confirmation feedback.
+258. Refine mail trigger reliability.
+259. Refine registration route auth handling.
+260. Commit registration refinement pass 1.
+
+DAY 5 - SHREE
+261. Refine create event validation.
+262. Refine edit event validation.
+263. Refine poster/image upload handling.
+264. Refine event capacity edge cases.
+265. Refine unlimited-capacity representation if used.
+266. Refine team registration options.
+267. Refine event page CTA conditions.
+268. Refine organizer controls.
+269. Refine event create/edit success flows.
+270. Commit create-event refinement pass 1.
+
+DAY 5 - KABHILESH
+271. Refine student dashboard empty states.
+272. Refine organizer dashboard empty states.
+273. Refine admin dashboard minimal layout.
+274. Refine superadmin dashboard minimal layout.
+275. Refine request counters accuracy.
+276. Refine recent activity sections if present.
+277. Refine dashboard access redirects.
+278. Refine dashboard loading skeletons.
+279. Refine dashboard responsive spacing.
+280. Commit dashboard refinement pass 1.
+
+DAY 5 - MUKHIL
+281. Refine event analytics loading states.
+282. Refine chart legends and labels.
+283. Refine colors and data ordering.
+284. Refine registrations table structure.
+285. Refine event analytics route errors.
+286. Refine platform analytics metric mapping.
+287. Refine top-college style and ordering.
+288. Refine line chart formatting.
+289. Refine data fallback behavior.
+290. Commit analytics refinement pass 1.
+
+DAY 5 - VANDHAN
+291. Refine search/filter state persistence.
+292. Refine profile edit field labels.
+293. Refine profile save confirmation state.
+294. Refine bookmarks empty state.
+295. Refine explore cards responsive layout.
+296. Refine profile image handling if present.
+297. Refine integration of profile data with defaults.
+298. Refine event detail navigation from browse.
+299. Refine settings layout consistency.
+300. Commit explore/profile refinement pass 1.
+
+DAY 6 - HARSITH
+301. Merge dev into module/auth.
+302. Resolve auth vs dashboard conflicts if any.
+303. Resolve auth vs registration route protection conflicts if any.
+304. Re-test login.
+305. Re-test signup.
+306. Re-test logout.
+307. Re-test superadmin login.
+308. Re-test request access flow.
+309. Re-test approval-state pages.
+310. Commit auth merge-sync pass.
+
+DAY 6 - NAREN
+311. Merge dev into module/user-registration.
+312. Resolve registration vs event page conflicts if any.
+313. Resolve registration vs profile prefill conflicts if any.
+314. Re-test registration page.
+315. Re-test registration API.
+316. Re-test attendance page.
+317. Re-test manual attendance.
+318. Re-test QR attendance.
+319. Re-test confirmation notification path.
+320. Commit registration merge-sync pass.
+
+DAY 6 - SHREE
+321. Merge dev into module/create-event.
+322. Resolve event vs analytics routing conflicts if any.
+323. Resolve event vs dashboard quick-link conflicts if any.
+324. Re-test create event.
+325. Re-test edit event.
+326. Re-test organizer event page.
+327. Re-test event image persistence.
+328. Re-test tags and registration source state.
+329. Re-test event page CTA alignment.
+330. Commit create-event merge-sync pass.
+
+DAY 6 - KABHILESH
+331. Merge dev into module/dashboard.
+332. Resolve dashboard vs auth role conflicts if any.
+333. Resolve dashboard vs analytics links conflicts if any.
+334. Re-test student dashboard.
+335. Re-test organizer dashboard.
+336. Re-test admin dashboard.
+337. Re-test superadmin dashboard.
+338. Re-test dashboard navigation.
+339. Re-test protected route behavior.
+340. Commit dashboard merge-sync pass.
+
+DAY 6 - MUKHIL
+341. Merge dev into module/analytics.
+342. Resolve analytics vs event route conflicts if any.
+343. Resolve analytics vs dashboard link conflicts if any.
+344. Re-test event analytics page.
+345. Re-test superadmin analytics page.
+346. Re-test chart data mappings.
+347. Re-test no-data states.
+348. Re-test event-specific route handling.
+349. Re-test platform metric cards.
+350. Commit analytics merge-sync pass.
+
+DAY 6 - VANDHAN
+351. Merge dev into module/explore-events.
+352. Resolve profile vs registration prefill conflicts if any.
+353. Resolve browse vs event route conflicts if any.
+354. Re-test browse page.
+355. Re-test bookmarks.
+356. Re-test profile page.
+357. Re-test edit profile.
+358. Re-test settings page.
+359. Re-test profile data availability for registration.
+360. Commit explore/profile merge-sync pass.
+
+DAY 7 - HARSITH
+361. Add homepage final auth-aware state.
+362. Add navbar final role-aware links.
+363. Add request flow final polish.
+364. Add mail content final polish.
+365. Add login UX polish.
+366. Add signup UX polish.
+367. Add logout confirmation or state polish if needed.
+368. Recheck middleware role map.
+369. Verify auth flows on clean session.
+370. Commit auth polish pass.
+
+DAY 7 - NAREN
+371. Add registration modal/page final polish.
+372. Add payment field compatibility if required by event.
+373. Add registration custom field polish.
+374. Add attendance scanner UI polish.
+375. Add attendance search polish.
+376. Add success/error messages polish.
+377. Verify event registration short-link compatibility.
+378. Verify registration auth reliability.
+379. Verify QR generation/retrieval.
+380. Commit registration polish pass.
+
+DAY 7 - SHREE
+381. Add create/edit form final polish.
+382. Add organizer event page final polish.
+383. Add event registration CTA polish.
+384. Add attendance and analytics links on event page.
+385. Verify event short URL routing.
+386. Verify event showcase responsiveness.
+387. Verify event field persistence after edit.
+388. Verify image preview/update behavior.
+389. Verify registration source behavior.
+390. Commit create-event polish pass.
+
+DAY 7 - KABHILESH
+391. Add dashboard final visual polish.
+392. Add admin dashboard compact refinements.
+393. Add superadmin dashboard compact refinements.
+394. Verify student/organizer dashboard shared shell consistency.
+395. Verify request/user tables or cards as applicable.
+396. Verify quick action buttons.
+397. Verify counts against APIs.
+398. Verify navigation stability.
+399. Verify mobile layout.
+400. Commit dashboard polish pass.
+
+DAY 7 - MUKHIL
+401. Add analytics chart final visual polish.
+402. Add card summary polish.
+403. Add event analytics table polish.
+404. Add platform analytics section polish.
+405. Add labels and legends polish.
+406. Add empty/error state polish.
+407. Add report export backlog notes in code comments only if needed.
+408. Verify analytics routes from event page.
+409. Verify analytics routes from dashboard.
+410. Commit analytics polish pass.
+
+DAY 7 - VANDHAN
+411. Add browse page final polish.
+412. Add profile page final polish.
+413. Add edit profile final polish.
+414. Add bookmark flow final polish.
+415. Add filter UX final polish.
+416. Add profile completion field polish.
+417. Verify registration prefill data availability.
+418. Verify event cards responsiveness.
+419. Verify settings page consistency.
+420. Commit explore/profile polish pass.
+
+DAY 8 - INTEGRATION BLOCK 1
+421. Merge module/auth into dev.
+422. Re-test login flow on dev.
+423. Re-test logout flow on dev.
+424. Re-test request access flow on dev.
+425. Re-test role redirects on dev.
+426. Merge module/user-registration into dev.
+427. Re-test registration flow on dev.
+428. Re-test confirmation flow on dev.
+429. Re-test attendance flow on dev.
+430. Resolve conflicts between auth and registration if present.
+
+DAY 8 - INTEGRATION BLOCK 2
+431. Merge module/create-event into dev.
+432. Re-test create event flow on dev.
+433. Re-test edit event flow on dev.
+434. Re-test event page flow on dev.
+435. Merge module/explore-events into dev.
+436. Re-test browse page on dev.
+437. Re-test profile page on dev.
+438. Re-test bookmarks on dev.
+439. Resolve conflicts between event page and explore page integrations if present.
+440. Resolve conflicts between registration prefill and profile data if present.
+
+DAY 8 - INTEGRATION BLOCK 3
+441. Merge module/dashboard into dev.
+442. Re-test dashboards on dev.
+443. Merge module/analytics into dev.
+444. Re-test analytics on dev.
+445. Resolve dashboard and analytics link conflicts if present.
+446. Resolve dashboard and auth role conflicts if present.
+447. Resolve event page and analytics route conflicts if present.
+448. Capture remaining integration bugs.
+449. Assign bug fixes to module owners.
+450. Commit dev integration fixes.
+
+DAY 9 - HARSITH BUG FIX DAY
+451. Fix auth bug 1 from dev integration.
+452. Fix auth bug 2 from dev integration.
+453. Fix navbar auth state issue if any.
+454. Fix middleware protected route issue if any.
+455. Fix request access mail issue if any.
+456. Re-test auth flows after fixes.
+457. Commit auth dev bugfix 1.
+458. Commit auth dev bugfix 2.
+459. Merge fixes to dev.
+460. Confirm no auth regressions remain.
+
+DAY 9 - NAREN BUG FIX DAY
+461. Fix registration bug 1 from dev integration.
+462. Fix registration bug 2 from dev integration.
+463. Fix attendance API issue if any.
+464. Fix QR scan issue if any.
+465. Fix registration confirmation issue if any.
+466. Re-test registration and attendance after fixes.
+467. Commit reg dev bugfix 1.
+468. Commit reg dev bugfix 2.
+469. Merge fixes to dev.
+470. Confirm no registration regressions remain.
+
+DAY 9 - SHREE BUG FIX DAY
+471. Fix create event bug 1 from dev integration.
+472. Fix edit event bug 2 from dev integration.
+473. Fix event page issue if any.
+474. Fix image handling issue if any.
+475. Fix event route issue if any.
+476. Re-test create/edit/event page after fixes.
+477. Commit event dev bugfix 1.
+478. Commit event dev bugfix 2.
+479. Merge fixes to dev.
+480. Confirm no event regressions remain.
+
+DAY 9 - KABHILESH BUG FIX DAY
+481. Fix dashboard bug 1 from dev integration.
+482. Fix dashboard bug 2 from dev integration.
+483. Fix role visibility issue if any.
+484. Fix card count issue if any.
+485. Fix navigation issue if any.
+486. Re-test all dashboards after fixes.
+487. Commit dash dev bugfix 1.
+488. Commit dash dev bugfix 2.
+489. Merge fixes to dev.
+490. Confirm no dashboard regressions remain.
+
+DAY 9 - MUKHIL BUG FIX DAY
+491. Fix analytics bug 1 from dev integration.
+492. Fix analytics bug 2 from dev integration.
+493. Fix chart data issue if any.
+494. Fix route loading issue if any.
+495. Fix summary card mismatch issue if any.
+496. Re-test analytics after fixes.
+497. Commit analytics dev bugfix 1.
+498. Commit analytics dev bugfix 2.
+499. Merge fixes to dev.
+500. Confirm no analytics regressions remain.
+
+DAY 9 - VANDHAN BUG FIX DAY
+501. Fix browse bug 1 from dev integration.
+502. Fix profile bug 2 from dev integration.
+503. Fix bookmark issue if any.
+504. Fix edit profile issue if any.
+505. Fix prefill compatibility issue if any.
+506. Re-test explore/profile after fixes.
+507. Commit explore dev bugfix 1.
+508. Commit explore dev bugfix 2.
+509. Merge fixes to dev.
+510. Confirm no explore/profile regressions remain.
+
+DAY 10 - FILE RESPONSIBILITY PASS
+511. Harsith reviews all auth files for ownership clarity.
+512. Harsith lists auth-related shared files touched.
+513. Harsith confirms homepage and navbar scope.
+514. Naren reviews all registration files for ownership clarity.
+515. Naren lists attendance-related shared files touched.
+516. Naren confirms registration mail and QR ownership.
+517. Shree reviews all event files for ownership clarity.
+518. Shree lists create/edit/event page shared files touched.
+519. Shree confirms image-handling integration points.
+520. Kabhilesh reviews dashboard files for ownership clarity.
+521. Kabhilesh lists shared dashboard UI files touched.
+522. Kabhilesh confirms role-specific dashboard responsibility.
+523. Mukhil reviews analytics files for ownership clarity.
+524. Mukhil lists shared chart or metrics helper files touched.
+525. Mukhil confirms report backlog placeholder ownership.
+526. Vandhan reviews explore/profile files for ownership clarity.
+527. Vandhan lists profile API and prefill-related shared files touched.
+528. Vandhan confirms browse/profile/settings ownership.
+529. Team checks services folder ownership map.
+530. Team checks lib folder ownership map.
+
+DAY 10 - SHARED FILE ALLOCATION DETAILS
+531. Harsith primary shared files: src/lib/auth.ts
+532. Harsith primary shared files: src/lib/email.ts
+533. Harsith shared review file: src/components/Navbar.tsx
+534. Harsith shared review file: src/middleware.ts
+535. Naren primary shared files: src/services/registration.service.ts
+536. Naren shared review file: src/app/events/[id]/page.tsx registration section
+537. Naren shared review file: src/lib/validations.ts registration schema section
+538. Shree primary shared files: src/services/event.service.ts
+539. Shree shared review file: prisma/schema.prisma event fields section
+540. Shree shared review file: src/app/events/[id]/page.tsx event showcase section
+541. Kabhilesh primary shared files: src/services/admin.service.ts
+542. Kabhilesh shared review file: src/components/ui card-style primitives
+543. Kabhilesh shared review file: src/components/Navbar.tsx dashboard navigation links
+544. Mukhil primary shared files: src/services/analytics.service.ts
+545. Mukhil shared review file: src/app/events/[id]/page.tsx analytics link section
+546. Mukhil shared review file: src/app/superadmin/page.tsx analytics entry section
+547. Vandhan primary shared files: src/services/user.service.ts
+548. Vandhan primary shared files: src/services/bookmark.service.ts
+549. Vandhan shared review file: src/lib/utils.ts
+550. Vandhan shared review file: registration prefill compatibility in profile responses
+
+DAY 11 - NATURAL MERGE CONFLICT RISK AREAS
+551. Navbar role links between Harsith and Kabhilesh.
+552. Navbar event quick links between Harsith and Kabhilesh.
+553. Event page CTA and analytics/attendance links between Shree, Naren, and Mukhil.
+554. Middleware route protection between Harsith and Kabhilesh.
+555. Profile prefill fields between Vandhan and Naren.
+556. Prisma schema updates between Shree, Naren, and Harsith.
+557. Event route parameter handling between Shree and Mukhil.
+558. Dashboard analytics entry points between Kabhilesh and Mukhil.
+559. Notification/email triggers between Harsith and Naren.
+560. Shared validation schemas between Harsith, Naren, and Vandhan.
+
+DAY 11 - CONFLICT RESOLUTION PLAN
+561. If Navbar conflict occurs, Harsith resolves auth links and Kabhilesh verifies dashboard links.
+562. If event page conflict occurs, Shree resolves layout baseline, Naren restores registration/attendance actions, Mukhil restores analytics link.
+563. If middleware conflict occurs, Harsith resolves token/auth logic, Kabhilesh verifies route behavior.
+564. If profile prefill conflict occurs, Vandhan resolves profile payload shape, Naren verifies registration mapping.
+565. If Prisma schema conflict occurs, team compares DB intent before merge and generates one consistent migration path.
+566. If analytics route conflict occurs, Mukhil resolves route load logic, Shree verifies event link correctness.
+567. If notification flow conflict occurs, Harsith resolves email helper side, Naren resolves registration trigger side.
+568. If validations conflict occurs, field-level owner updates schema while Harsith ensures overall consistency.
+569. Every conflict resolution gets a dedicated merge or fix commit.
+570. Every conflict resolution is re-tested immediately.
+
+DAY 11 - TESTING MATRIX AUTH
+571. Login as normal user.
+572. Signup as new user.
+573. Logout and verify cookie clears.
+574. Login as superadmin.
+575. Submit organizer request access.
+576. Verify pending organizer path.
+577. Verify waiting-for-approval page.
+578. Verify request-rejected page if applicable.
+579. Verify protected route redirect when unauthenticated.
+580. Verify protected route redirect when wrong role.
+
+DAY 11 - TESTING MATRIX REGISTRATION
+581. Open event registration page.
+582. Verify required fields render.
+583. Verify default college field behavior.
+584. Verify registration number field remains text input.
+585. Submit registration successfully.
+586. Verify confirmation response.
+587. Verify QR code data exists.
+588. Verify confirmation notification/email path.
+589. Verify attendance page loads registrations.
+590. Verify manual attendance mark works.
+
+DAY 11 - TESTING MATRIX EVENT
+591. Open create event page.
+592. Fill all required create fields.
+593. Create event successfully.
+594. Reopen event in edit mode.
+595. Update editable fields.
+596. Save event successfully.
+597. Open organizer event page.
+598. Verify event metadata renders.
+599. Verify organizer-only actions render correctly.
+600. Verify event image renders if present.
+
+DAY 11 - TESTING MATRIX DASHBOARD
+601. Open student dashboard.
+602. Open organizer dashboard.
+603. Open admin dashboard.
+604. Open superadmin dashboard.
+605. Verify key counts load.
+606. Verify quick links work.
+607. Verify request panels load where applicable.
+608. Verify role restrictions work.
+609. Verify empty states render safely.
+610. Verify responsive layout.
+
+DAY 11 - TESTING MATRIX ANALYTICS
+611. Open event analytics from event page.
+612. Verify summary cards show values.
+613. Verify status breakdown chart renders.
+614. Verify timeline chart renders.
+615. Verify college distribution chart renders.
+616. Verify registrations table renders.
+617. Open superadmin analytics page.
+618. Verify platform-level cards render.
+619. Verify analytics empty state is safe.
+620. Verify analytics route access control.
+
+DAY 11 - TESTING MATRIX EXPLORE PROFILE
+621. Open browse page.
+622. Search events by title.
+623. Filter events.
+624. Open event detail from browse.
+625. Toggle bookmark if supported.
+626. Open profile page.
+627. Edit profile fields.
+628. Save profile successfully.
+629. Reopen registration flow and verify prefill compatibility.
+630. Verify settings page loads.
+
+DAY 12 - COMMIT SCHEDULE HARSITH
+631. Commit 1: auth: scaffold login and signup pages
+632. Commit 2: auth: add auth api route skeletons
+633. Commit 3: auth: implement login validation and submit flow
+634. Commit 4: auth: implement signup validation and submit flow
+635. Commit 5: auth: add jwt and auth cookie handling
+636. Commit 6: auth: implement logout endpoint and navbar action
+637. Commit 7: auth: add superadmin login page and flow
+638. Commit 8: auth: add organizer request access page
+639. Commit 9: auth: implement request access api validation
+640. Commit 10: auth: add request access email to superadmin
+641. Commit 11: auth: add approval email helper and template
+642. Commit 12: auth: wire pending and rejected organizer states
+643. Commit 13: auth: refine middleware route guards
+644. Commit 14: auth: polish homepage and navbar auth states
+645. Commit 15: auth: fix integration issues after dev merge
+
+DAY 12 - COMMIT SCHEDULE NAREN
+646. Commit 1: reg: scaffold event registration page
+647. Commit 2: reg: add registration field parsing and defaults
+648. Commit 3: reg: implement registration submit api flow
+649. Commit 4: reg: add confirmation response handling and qr support
+650. Commit 5: reg: trigger registration confirmation notification or mail
+651. Commit 6: reg: scaffold attendance page and registrations list
+652. Commit 7: reg: add manual attendance mark flow
+653. Commit 8: reg: add qr attendance scanner flow
+654. Commit 9: reg: refine registration auth and prefill compatibility
+655. Commit 10: reg: fix integration issues after dev merge
+
+DAY 12 - COMMIT SCHEDULE SHREE
+656. Commit 1: event: scaffold create event page
+657. Commit 2: event: add form sections and validation
+658. Commit 3: event: implement create event submit flow
+659. Commit 4: event: add edit event preload and update flow
+660. Commit 5: event: add organizer event page baseline
+661. Commit 6: event: wire event metadata and controls
+662. Commit 7: event: integrate registration source and team settings
+663. Commit 8: event: refine event image and page layout
+664. Commit 9: event: add event page links to attendance and analytics
+665. Commit 10: event: fix integration issues after dev merge
+
+DAY 12 - COMMIT SCHEDULE KABHILESH
+666. Commit 1: dash: scaffold shared dashboard shell
+667. Commit 2: dash: add student dashboard summary cards
+668. Commit 3: dash: add organizer dashboard summary cards
+669. Commit 4: dash: add admin dashboard minimal request view
+670. Commit 5: dash: add superadmin dashboard minimal user/request view
+671. Commit 6: dash: connect dashboard summary service
+672. Commit 7: dash: refine role navigation and dashboard links
+673. Commit 8: dash: polish dashboard responsiveness and empty states
+674. Commit 9: dash: fix integration issues after dev merge
+
+DAY 12 - COMMIT SCHEDULE MUKHIL
+675. Commit 1: analytics: scaffold event analytics page
+676. Commit 2: analytics: add event summary metric cards
+677. Commit 3: analytics: add status breakdown chart
+678. Commit 4: analytics: add registration timeline chart
+679. Commit 5: analytics: add college distribution chart
+680. Commit 6: analytics: add registrations table and empty states
+681. Commit 7: analytics: scaffold superadmin analytics page
+682. Commit 8: analytics: connect platform metrics and route links
+683. Commit 9: analytics: fix integration issues after dev merge
+
+DAY 12 - COMMIT SCHEDULE VANDHAN
+684. Commit 1: explore: scaffold browse events page
+685. Commit 2: profile: scaffold profile and edit profile pages
+686. Commit 3: explore: implement search and filters
+687. Commit 4: explore: implement event cards and navigation
+688. Commit 5: bookmarks: add bookmarks listing or toggle support
+689. Commit 6: profile: implement edit profile form submit flow
+690. Commit 7: profile: align profile payload with registration prefill
+691. Commit 8: explore: polish browse and profile ux
+692. Commit 9: explore: fix integration issues after dev merge
+
+DAY 13 - FILE TOUCH MAP HARSITH
+693. src/app/page.tsx
+694. src/components/Navbar.tsx
+695. src/lib/auth.ts
+696. src/lib/email.ts
+697. src/middleware.ts
+698. src/app/login/page.tsx
+699. src/app/signup/page.tsx
+700. src/app/admin/page.tsx or admin request access page
+701. src/app/waiting-for-approval/page.tsx
+702. src/app/request-rejected/page.tsx
+703. src/app/api/auth/login/route.ts
+704. src/app/api/auth/register/route.ts
+705. src/app/api/auth/logout/route.ts
+706. src/app/api/auth/me/route.ts
+707. src/app/api/auth/superadmin/login/route.ts
+708. src/app/api/contact/admin-request/route.ts
+709. src/app/api/organiser/register/route.ts
+710. src/app/api/organiser/status/route.ts
+
+DAY 13 - FILE TOUCH MAP NAREN
+711. src/app/events/[id]/register/page.tsx
+712. src/app/events/[id]/attendance/page.tsx
+713. src/app/organizer/scan-attendance/page.tsx
+714. src/app/api/events/[id]/register/route.ts
+715. src/app/api/events/[id]/verify-attendance/route.ts
+716. src/app/api/events/[id]/attendance/mark/route.ts
+717. src/app/api/attendance/mark/route.ts
+718. src/services/registration.service.ts
+719. src/lib/validations.ts registration-related schema area
+720. src/app/events/[id]/page.tsx registration/attendance section
+721. src/services/notification.service.ts if registration notifications hook here
+722. prisma/schema.prisma registration fields area
+
+DAY 13 - FILE TOUCH MAP SHREE
+723. src/app/events/create/page.tsx
+724. src/app/events/[id]/page.tsx
+725. src/app/api/events/create/route.ts if present in structure
+726. src/app/api/events/[id]/route.ts
+727. src/services/event.service.ts
+728. prisma/schema.prisma event fields area
+729. src/lib/validations.ts event-related schema area
+730. src/app/organizer/my-events page or supporting route if needed
+731. src/components event-related reusable sections if extracted
+732. public or image handling references if needed
+
+DAY 13 - FILE TOUCH MAP KABHILESH
+733. src/app/dashboard/page.tsx
+734. src/app/user/dashboard/page.tsx
+735. src/app/organizer/dashboard/page.tsx
+736. src/app/admin/dashboard/page.tsx
+737. src/app/superadmin/page.tsx
+738. src/services/admin.service.ts
+739. src/components dashboard widgets if created
+740. src/components/Navbar.tsx dashboard navigation area
+741. src/lib/utils.ts only if dashboard helpers are added
+742. src/app/api/admin routes if needed for counts
+
+DAY 13 - FILE TOUCH MAP MUKHIL
+743. src/app/events/[id]/analytics/page.tsx
+744. src/app/api/events/[id]/analytics/route.ts
+745. src/app/superadmin/analytics/page.tsx
+746. src/services/analytics.service.ts
+747. package.json for chart/report dependencies if actually used
+748. src/components analytics chart wrappers if extracted
+749. src/app/events/[id]/page.tsx analytics link area
+750. src/app/superadmin/page.tsx analytics entry area
+
+DAY 13 - FILE TOUCH MAP VANDHAN
+751. src/app/browse/page.tsx
+752. src/app/bookmarks/page.tsx
+753. src/app/profile/page.tsx
+754. src/app/settings/page.tsx
+755. src/app/api/profile/complete/route.ts
+756. src/services/user.service.ts
+757. src/services/bookmark.service.ts
+758. src/lib/utils.ts if browse/profile helpers are added
+759. src/components event card/profile related UI if extracted
+760. src/app/events/[id]/register/page.tsx prefill compatibility area only if coordinated
+
+DAY 13 - QA ISSUE TRACKING TEMPLATE
+761. Issue ID
+762. Owner
+763. Branch
+764. Module
+765. Repro steps
+766. Expected behavior
+767. Actual behavior
+768. Root cause
+769. Fix commit
+770. Retest status
+
+DAY 13 - ROOT FILE CLEANUP CANDIDATES
+771. COPILOT_SESSION_HISTORY.md
+772. DELIVERY_SUMMARY.md
+773. FEATURES.md
+774. IMPLEMENTATION_COMPLETE.md
+775. IMPLEMENTATION_SUMMARY.md
+776. project-setup.txt
+777. QUICK_START.md only if redundant with README.md
+778. DEVELOPER_GUIDE.md only if unused or duplicative
+779. build.log if not needed
+780. temporary scripts created only for debugging
+
+DAY 13 - ROOT FILE CLEANUP RULES
+781. Do not delete README.md.
+782. Do not delete package.json.
+783. Do not delete lockfile if used.
+784. Do not delete prisma folder.
+785. Do not delete src folder.
+786. Do not delete public folder.
+787. Remove only files the team agrees are redundant.
+788. Cleanup should happen after final verification.
+789. Make cleanup changes in one dedicated commit.
+790. Mention cleanup in final demo explanation.
+
+DAY 14 - FINAL VALIDATION PASS 1
+791. Validate homepage.
+792. Validate navbar auth state.
+793. Validate login.
+794. Validate signup.
+795. Validate superadmin login.
+796. Validate organizer request access.
+797. Validate pending/rejected state pages.
+798. Validate logout.
+799. Validate middleware redirects.
+800. Validate unauthorized route behavior.
+
+DAY 14 - FINAL VALIDATION PASS 2
+801. Validate create event.
+802. Validate edit event.
+803. Validate event page.
+804. Validate registration page.
+805. Validate confirm registration flow.
+806. Validate registration confirmation mail/notification if wired.
+807. Validate attendance manual flow.
+808. Validate attendance QR flow.
+809. Validate analytics event page.
+810. Validate explore page.
+
+DAY 14 - FINAL VALIDATION PASS 3
+811. Validate profile page.
+812. Validate edit profile.
+813. Validate settings page.
+814. Validate bookmarks.
+815. Validate student dashboard.
+816. Validate organizer dashboard.
+817. Validate admin dashboard.
+818. Validate superadmin dashboard.
+819. Validate superadmin analytics.
+820. Validate image persistence fields.
+
+DAY 14 - FINAL RELEASE PREP
+821. Freeze feature changes.
+822. Merge remaining bugfix branches into dev.
+823. Re-run smoke tests on dev.
+824. Perform root cleanup commit if approved.
+825. Re-run smoke tests after cleanup.
+826. Update README if needed.
+827. Confirm branch list is clean.
+828. Confirm no leftover conflict markers.
+829. Confirm no temporary debug scripts remain.
+830. Confirm no broken imports remain.
+
+DAY 15 - MERGE TO MAIN
+831. Pull latest dev.
+832. Confirm dev passes smoke flow.
+833. Merge dev into main with merge commit.
+834. Resolve final merge conflicts if any.
+835. Re-test main branch build and startup.
+836. Re-test critical flows on main.
+837. Tag release if needed.
+838. Capture final branch and commit summary.
+839. Prepare demo order by module.
+840. Prepare commit history explanation by contributor.
+
+DEMO EXPLANATION ORDER
+841. Harsith explains auth, homepage auth state, navbar, logout, superadmin login, request access, and approval mail.
+842. Naren explains registration page, registration confirmation, attendance page, manual attendance, and QR attendance.
+843. Shree explains create event, edit event, organizer event page, and event field flow.
+844. Kabhilesh explains student/organizer dashboard, admin dashboard, and superadmin dashboard.
+845. Mukhil explains event analytics, platform analytics, chart logic, and future report export plan.
+846. Vandhan explains browse, filters, bookmarks, profile, and edit profile.
+
+EXAM / VIVA SUPPORT POINTS
+847. Why use dev plus module branches: to support integration before release.
+848. Why use merge commits: to preserve collaboration history and integration points.
+849. Why split services/lib/components ownership: to avoid unclear responsibility in shared files.
+850. Why keep analytics in superadmin: to support platform-level visibility and governance.
+851. Why keep image storage PostgreSQL-compatible: because the project requirement is DB-backed persistence.
+852. Why keep root cleanup late: because temporary summaries may help during active development but should not clutter final submission.
+853. Why have dashboards separated by role: because user journeys and permissions differ.
+854. Why registration and profile modules interact: because profile data improves registration prefill.
+855. Why analytics depends on registration/event modules: because charts are built from registration and event data.
+856. Why auth affects almost all modules: because routes, roles, and permissions depend on it.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - HARSITH
+857. Login page complete.
+858. Signup page complete.
+859. Logout complete.
+860. Homepage auth state complete.
+861. Navbar auth links complete.
+862. Superadmin login complete.
+863. Organizer request access page complete.
+864. Request access API complete.
+865. Request email to superadmin complete.
+866. Approval mail path complete.
+867. Waiting-for-approval page complete.
+868. Request-rejected page complete.
+869. Auth middleware complete.
+870. Role redirects complete.
+871. Auth smoke test complete.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - NAREN
+872. Event registration page complete.
+873. Registration field parsing complete.
+874. Registration submit API complete.
+875. Registration confirmation handling complete.
+876. Registration confirmation mail or notification complete.
+877. Attendance page complete.
+878. Manual attendance flow complete.
+879. QR attendance flow complete.
+880. Registration-to-attendance integration complete.
+881. Registration smoke test complete.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - SHREE
+882. Create event page complete.
+883. Create event submit flow complete.
+884. Edit event preload complete.
+885. Edit event update flow complete.
+886. Event page complete.
+887. Event metadata rendering complete.
+888. Event organizer controls complete.
+889. Event registration source settings complete.
+890. Event image handling complete.
+891. Event smoke test complete.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - KABHILESH
+892. Student dashboard complete.
+893. Organizer dashboard complete.
+894. Admin dashboard complete.
+895. Superadmin dashboard complete.
+896. Dashboard counts complete.
+897. Dashboard role navigation complete.
+898. Dashboard responsiveness complete.
+899. Dashboard loading states complete.
+900. Dashboard empty states complete.
+901. Dashboard smoke test complete.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - MUKHIL
+902. Event analytics page complete.
+903. Event analytics API complete.
+904. Summary cards complete.
+905. Status chart complete.
+906. Timeline chart complete.
+907. College chart complete.
+908. Registrations table complete.
+909. Superadmin analytics complete.
+910. Report export backlog defined.
+911. Analytics smoke test complete.
+
+PER-MEMBER ACTUAL DELIVERABLES CHECKLIST - VANDHAN
+912. Browse page complete.
+913. Search and filter flow complete.
+914. Bookmark support complete.
+915. Profile page complete.
+916. Edit profile complete.
+917. Settings page complete.
+918. Profile data API complete.
+919. Registration prefill compatibility complete.
+920. Explore/profile responsiveness complete.
+921. Explore/profile smoke test complete.
+
+FINAL REPOSITORY CHECKLIST
+922. All module branches merged into dev.
+923. Dev merged into main.
+924. No unresolved merge markers remain.
+925. No broken imports remain.
+926. No temporary debug files remain.
+927. Root cleaned of redundant docs if approved.
+928. README still present.
+929. Prisma schema aligned with database.
+930. Image fields verified.
+931. Role-based routing verified.
+932. Registration and attendance verified.
+933. Event create/edit verified.
+934. Dashboards verified.
+935. Analytics verified.
+936. Explore/profile verified.
+937. Superadmin flow verified.
+938. Mail flows verified where configured.
+939. Team can explain ownership clearly.
+940. Team can explain merge history clearly.
+
+LONG-RUN EXECUTION TRACKER
+941. [Harsith][auth] Migrate homepage auth state from reference project.
+942. [Naren][user-registration] Migrate registration field defaults from reference project.
+943. [Shree][create-event] Migrate event create form structure from reference project.
+944. [Kabhilesh][dashboard] Migrate dashboard shell layout from reference project.
+945. [Mukhil][analytics] Migrate event analytics page structure from reference project.
+946. [Vandhan][explore-events] Migrate browse page structure from reference project.
+947. [Harsith][auth] Migrate login API behavior from reference project.
+948. [Naren][user-registration] Migrate attendance registrations listing from reference project.
+949. [Shree][create-event] Migrate edit event preload logic from reference project.
+950. [Kabhilesh][dashboard] Migrate admin request summary behavior from reference project.
+951. [Mukhil][analytics] Migrate chart dataset mapping from reference project.
+952. [Vandhan][explore-events] Migrate profile form payload mapping from reference project.
+953. [Harsith][auth] Migrate logout behavior from reference project.
+954. [Naren][user-registration] Migrate QR attendance verification behavior from reference project.
+955. [Shree][create-event] Migrate event page CTA logic from reference project.
+956. [Kabhilesh][dashboard] Migrate organizer dashboard counters from reference project.
+957. [Mukhil][analytics] Migrate superadmin analytics card logic from reference project.
+958. [Vandhan][explore-events] Migrate bookmarks behavior from reference project.
+959. [Harsith][auth] Verify request access email flow against reference project.
+960. [Naren][user-registration] Verify registration confirmation flow against reference project.
+961. [Shree][create-event] Verify create-event submit payload against reference project.
+962. [Kabhilesh][dashboard] Verify role redirect destinations against reference project.
+963. [Mukhil][analytics] Verify analytics route linking against reference project.
+964. [Vandhan][explore-events] Verify profile response shape against reference project.
+965. [Harsith][auth] Align middleware protected routes with actual module needs.
+966. [Naren][user-registration] Align registration page fields with profile prefill support.
+967. [Shree][create-event] Align event schema fields with UI form sections.
+968. [Kabhilesh][dashboard] Align dashboard summaries with available service outputs.
+969. [Mukhil][analytics] Align event-level metrics with registration statuses.
+970. [Vandhan][explore-events] Align browse cards with actual event shape.
+971. [Harsith][auth] Test normal user route access after auth merge.
+972. [Naren][user-registration] Test event registration submit after auth merge.
+973. [Shree][create-event] Test organizer event actions after auth merge.
+974. [Kabhilesh][dashboard] Test role dashboards after auth merge.
+975. [Mukhil][analytics] Test analytics permissions after auth merge.
+976. [Vandhan][explore-events] Test profile access after auth merge.
+977. [Harsith][auth] Review shared file diffs before dev merge.
+978. [Naren][user-registration] Review shared file diffs before dev merge.
+979. [Shree][create-event] Review shared file diffs before dev merge.
+980. [Kabhilesh][dashboard] Review shared file diffs before dev merge.
+981. [Mukhil][analytics] Review shared file diffs before dev merge.
+982. [Vandhan][explore-events] Review shared file diffs before dev merge.
+983. [Harsith][auth] Re-test request approval mail after schema updates.
+984. [Naren][user-registration] Re-test registration QR after schema updates.
+985. [Shree][create-event] Re-test event image persistence after schema updates.
+986. [Kabhilesh][dashboard] Re-test admin request counts after schema updates.
+987. [Mukhil][analytics] Re-test status charts after schema updates.
+988. [Vandhan][explore-events] Re-test profile edit after schema updates.
+989. [Harsith][auth] Validate homepage state for guest and authenticated users.
+990. [Naren][user-registration] Validate registration flow for solo and team events.
+991. [Shree][create-event] Validate create/edit flow for paid and free events.
+992. [Kabhilesh][dashboard] Validate dashboard behavior for active and pending organizers.
+993. [Mukhil][analytics] Validate analytics behavior for low-data and no-data events.
+994. [Vandhan][explore-events] Validate explore behavior for empty and populated filters.
+995. [Harsith][auth] Prepare final auth module demo script.
+996. [Naren][user-registration] Prepare final registration module demo script.
+997. [Shree][create-event] Prepare final create-event module demo script.
+998. [Kabhilesh][dashboard] Prepare final dashboard module demo script.
+999. [Mukhil][analytics] Prepare final analytics module demo script.
+1000. [Vandhan][explore-events] Prepare final explore/profile module demo script.
+1001. [Harsith][auth] Validate true authorship for auth commits.
+1002. [Naren][user-registration] Validate true authorship for registration commits.
+1003. [Shree][create-event] Validate true authorship for event commits.
+1004. [Kabhilesh][dashboard] Validate true authorship for dashboard commits.
+1005. [Mukhil][analytics] Validate true authorship for analytics commits.
+1006. [Vandhan][explore-events] Validate true authorship for explore/profile commits.
+1007. [Harsith][auth] Verify logout button visibility by role state.
+1008. [Naren][user-registration] Verify attendance button behavior from event page.
+1009. [Shree][create-event] Verify organizer event action buttons visibility.
+1010. [Kabhilesh][dashboard] Verify dashboard entry points from navbar or landing links.
+1011. [Mukhil][analytics] Verify analytics entry points from event page and superadmin page.
+1012. [Vandhan][explore-events] Verify browse-to-event navigation.
+1013. [Harsith][auth] Verify request status mail wording and state transitions.
+1014. [Naren][user-registration] Verify manual attendance and QR attendance produce equivalent result.
+1015. [Shree][create-event] Verify edit event does not break event analytics routing.
+1016. [Kabhilesh][dashboard] Verify counts remain stable after event edits and registrations.
+1017. [Mukhil][analytics] Verify chart data follows latest registration and attendance statuses.
+1018. [Vandhan][explore-events] Verify profile changes appear in subsequent registration prefill.
+1019. [Harsith][auth] Verify homepage and navbar remain clean after integration.
+1020. [Naren][user-registration] Verify registration confirmation user messaging remains clear.
+1021. [Shree][create-event] Verify event page remains organizer-usable after integrations.
+1022. [Kabhilesh][dashboard] Verify dashboard layouts remain minimal where required.
+1023. [Mukhil][analytics] Verify superadmin analytics stays useful but not overloaded.
+1024. [Vandhan][explore-events] Verify browse/profile module remains isolated enough for explanation.
+1025. [Harsith][auth] Final auth cleanup and dead code removal.
+1026. [Naren][user-registration] Final registration cleanup and dead code removal.
+1027. [Shree][create-event] Final event cleanup and dead code removal.
+1028. [Kabhilesh][dashboard] Final dashboard cleanup and dead code removal.
+1029. [Mukhil][analytics] Final analytics cleanup and dead code removal.
+1030. [Vandhan][explore-events] Final explore/profile cleanup and dead code removal.
+1031. [Harsith][auth] Final auth smoke test sign-off.
+1032. [Naren][user-registration] Final registration smoke test sign-off.
+1033. [Shree][create-event] Final create-event smoke test sign-off.
+1034. [Kabhilesh][dashboard] Final dashboard smoke test sign-off.
+1035. [Mukhil][analytics] Final analytics smoke test sign-off.
+1036. [Vandhan][explore-events] Final explore/profile smoke test sign-off.
+1037. [Team][integration] Confirm shared file ownership explanation is ready.
+1038. [Team][integration] Confirm branch strategy explanation is ready.
+1039. [Team][integration] Confirm merge strategy explanation is ready.
+1040. [Team][integration] Confirm database image strategy explanation is ready.
+1041. [Team][integration] Confirm root cleanup explanation is ready.
+1042. [Team][integration] Confirm module boundaries explanation is ready.
+1043. [Team][integration] Confirm commit history explanation is ready.
+1044. [Team][integration] Confirm role-based architecture explanation is ready.
+1045. [Team][integration] Confirm analytics scope explanation is ready.
+1046. [Team][integration] Confirm registration-attendance linkage explanation is ready.
+1047. [Team][integration] Confirm request approval mail explanation is ready.
+1048. [Team][integration] Confirm profile-prefill linkage explanation is ready.
+1049. [Team][integration] Confirm dev-to-main release explanation is ready.
+1050. [Team][integration] Confirm final demo sequence is ready.
+
+FINAL NOTES
+1051. Use this plan as an execution and explanation document, not as a fake-history generator.
+1052. Keep real collaboration evidence in commits, merges, and file ownership.
+1053. If additional detail is needed later, extend this plan under the same structure instead of adding redundant root summary files.
+1054. Before release, confirm which markdown and txt files at root are still required and remove only the redundant ones.
+1055. Keep the final repository clean, stable, and explainable.

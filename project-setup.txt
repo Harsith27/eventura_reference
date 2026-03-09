@@ -1,0 +1,3484 @@
+Good. We’ll build this like a formal technical specification document that Copilot can interpret as architectural authority.
+
+Below is **PART 1 ONLY** — extremely detailed.
+Do not ask Copilot to generate code yet. This part defines the **foundation and architecture constraints**.
+
+You can paste this into your spec file.
+
+---
+
+# 🔷 PART 1 — SYSTEM ARCHITECTURE, TECHNOLOGY STACK, AND FOUNDATIONAL RULES
+
+---
+
+## 1.1 Project Objective
+
+Build a full-stack, production-grade Event Management Platform where:
+
+* Colleges host events
+* Organisers manage events
+* Participants register and attend events
+* Attendance is verified using QR codes
+* Email notifications are automated
+* Role-based dashboards control system access
+
+The system must be scalable, secure, modular, and production-ready.
+
+This is NOT a prototype.
+This is not a hackathon demo.
+This must follow real-world backend architecture standards.
+
+---
+
+## 1.2 Core Technology Stack (Non-Negotiable)
+
+### Frontend & Backend Framework
+
+* **Next.js (App Router)**
+* TypeScript (strict mode enabled)
+
+Use Next.js as:
+
+* Frontend (React Server + Client components)
+* Backend (API route handlers)
+
+Do NOT separate backend into another Express server.
+
+---
+
+### Database Layer
+
+* PostgreSQL (hosted database)
+* Prisma ORM
+
+All database interactions MUST go through Prisma.
+
+No raw SQL unless absolutely necessary.
+
+---
+
+### Authentication
+
+* JWT-based authentication
+* Password hashing using bcrypt
+* HTTP-only cookies for session storage
+
+No session storage in localStorage.
+No plaintext password storage.
+No insecure token exposure.
+
+---
+
+### Email Service
+
+* Nodemailer
+* SMTP-based configuration
+
+Emails must be sent from backend only.
+
+---
+
+### Image Storage
+
+Images (profile photos, event banners) must:
+
+* Be uploaded to cloud storage (e.g., Cloudinary or S3)
+* Store ONLY the image URL in the database
+* NEVER store binary image data in PostgreSQL
+
+---
+
+## 1.3 High-Level System Architecture
+
+The application must follow a layered structure:
+
+```
+Client (UI)
+   ↓
+API Route Handlers
+   ↓
+Service Layer (business logic)
+   ↓
+Prisma ORM
+   ↓
+PostgreSQL Database
+```
+
+### Strict Rule:
+
+Business logic must NOT exist directly inside route handlers.
+
+Instead:
+
+* Route handler validates request
+* Calls service function
+* Service function interacts with database
+
+This ensures maintainability and scalability.
+
+---
+
+## 1.4 Role-Based Access Control (RBAC)
+
+The system has 4 roles:
+
+* SUPERADMIN
+* ADMIN
+* ORGANISER
+* USER
+
+Each user must have exactly one role.
+
+The role must:
+
+* Be stored in database
+* Be embedded inside JWT
+* Be validated on every protected API call
+
+Frontend role rendering is not security.
+Backend validation is mandatory.
+
+---
+
+## 1.5 Dashboard Philosophy
+
+There must be only ONE dashboard route:
+
+```
+/dashboard
+```
+
+The dashboard UI must conditionally render based on user role.
+
+Do NOT create:
+
+```
+/admin-dashboard
+/user-dashboard
+/organiser-dashboard
+```
+
+All logic must branch inside the same layout.
+
+This ensures:
+
+* Clean routing
+* Maintainability
+* Centralized authentication
+
+---
+
+## 1.6 Environment Configuration
+
+The system must use environment variables for:
+
+* DATABASE_URL
+* JWT_SECRET
+* SMTP_HOST
+* SMTP_PORT
+* SMTP_USER
+* SMTP_PASS
+* CLOUD_STORAGE_KEYS
+
+Never hardcode credentials.
+
+Include `.env.example` file for reference.
+
+---
+
+## 1.7 Security Architecture Rules
+
+1. All protected routes must use middleware.
+2. Every API route must verify JWT.
+3. Role must be validated server-side.
+4. Inputs must be validated (using Zod or similar).
+5. UUIDs must be used for tokens.
+6. Passwords must be hashed.
+7. QR tokens must not be predictable.
+8. Never trust frontend state.
+
+---
+
+## 1.8 Database Design Philosophy
+
+* Use relational integrity
+* Use foreign keys
+* Use cascading deletes where appropriate
+* Avoid duplicate data
+* Use indexes for frequently queried fields
+
+Relations that must exist:
+
+* User → College
+* Event → Organiser (User)
+* Event → College
+* Registration → User
+* Registration → Event
+* Bookmark → User
+* Bookmark → Event
+* Notification → User
+
+---
+
+## 1.9 System Modularity Requirements
+
+Organize logic into:
+
+```
+/lib
+  prisma.ts
+  auth.ts
+  mail.ts
+  qr.ts
+/services
+  user.service.ts
+  event.service.ts
+  registration.service.ts
+  notification.service.ts
+```
+
+Each service file:
+
+* Handles only its domain logic
+* Must be reusable
+* Must not contain UI code
+
+---
+
+## 1.10 Data Integrity Principles
+
+The system must prevent:
+
+* Double event registration
+* Attendance marked twice
+* Overbooking beyond capacity
+* Registration after deadline
+* Duplicate bookmarks
+* Duplicate email accounts
+
+These checks must exist in backend logic, not frontend.
+
+---
+
+## 1.11 Scalability Considerations
+
+Design as if:
+
+* 10,000+ users
+* 1,000+ events
+* Concurrent registrations
+
+Ensure:
+
+* Optimized Prisma queries
+* Minimal nested queries
+* Proper indexing
+* Pagination for lists
+
+---
+
+## 1.12 Logging & Error Handling
+
+All API routes must:
+
+* Return standardized JSON responses
+* Include proper HTTP status codes
+* Catch and log errors
+* Never expose internal error stack traces to client
+
+Standard response structure:
+
+```
+{
+  success: boolean,
+  message: string,
+  data?: any
+}
+```
+
+---
+
+## 1.13 Non-Functional Requirements
+
+* Strict TypeScript
+* No `any` types
+* Use async/await
+* Clean code
+* Production-ready structure
+* Modular, scalable architecture
+* Clean separation of concerns
+
+---
+
+## 1.14 What Must NOT Be Done
+
+* No storing QR images in DB
+* No storing image binaries in DB
+* No duplicate dashboards
+* No frontend-only security
+* No business logic inside React components
+* No direct DB access from UI
+* No skipping validation
+* No payment verification logic (excluded entirely)
+
+---
+
+## 1.15 Final Directive for Copilot (For This Part)
+
+Treat this document as architectural authority.
+
+All future code must conform to:
+
+* Clean architecture
+* Role-based system
+* Secure JWT authentication
+* Prisma relational modeling
+* Modular service-based backend logic
+
+Do not generate UI yet.
+Do not generate schema yet.
+Do not generate API routes yet.
+
+This part defines foundation only.
+
+---
+
+When you're ready, say **“next”**, and I will generate:
+
+🔷 PART 2 — Complete Authentication & Role System Specification (Deep Technical Level)
+
+
+Good.
+Now we move into the **core security layer**. This is the backbone of everything else.
+
+Below is **PART 2 — Authentication & Role System (Extremely Detailed Technical Specification)**.
+Paste this directly into your master spec file under Part 1.
+
+---
+
+# 🔷 PART 2 — AUTHENTICATION, AUTHORIZATION & ROLE SYSTEM (DETAILED SPECIFICATION)
+
+---
+
+# 2.1 Authentication Philosophy
+
+Authentication must be:
+
+* Stateless (JWT-based)
+* Secure
+* Server-validated
+* Role-aware
+* Production-ready
+
+The system must **never trust frontend state**.
+
+All protected access must be validated server-side.
+
+---
+
+# 2.2 Authentication Method
+
+The system must use:
+
+* Email + Password login
+* bcrypt password hashing
+* JWT (JSON Web Token)
+* HTTP-only secure cookies for session storage
+
+Do NOT:
+
+* Store tokens in localStorage
+* Store passwords unhashed
+* Store session in memory
+
+---
+
+# 2.3 User Roles (Strict Enum)
+
+Roles must be defined in Prisma schema as:
+
+```
+enum Role {
+  SUPERADMIN
+  ADMIN
+  ORGANISER
+  USER
+}
+```
+
+Each user must have exactly one role.
+
+No multi-role users.
+No dynamic roles stored as strings.
+
+---
+
+# 2.4 Registration Types
+
+There are TWO types of account creation:
+
+### 1️⃣ Self Registration (USER only)
+
+When a normal participant signs up:
+
+* Role must automatically be USER
+* They cannot choose their role
+* They cannot assign themselves ORGANISER or ADMIN
+
+---
+
+### 2️⃣ Admin-Created Accounts
+
+Only:
+
+* SUPERADMIN can create ADMIN accounts
+* ADMIN can create ORGANISER accounts
+
+Users cannot create elevated accounts.
+
+This must be enforced in backend.
+
+---
+
+# 2.5 Password Security
+
+On account creation:
+
+1. Validate password strength:
+
+   * Minimum 8 characters
+   * Must include letters and numbers
+
+2. Hash password using bcrypt:
+
+   * Salt rounds: 10 or higher
+
+3. Store only hashed password
+
+Never log password.
+Never return password in API response.
+
+---
+
+# 2.6 Login Flow (Detailed Backend Logic)
+
+When user attempts login:
+
+### Step 1: Validate input
+
+* Email format
+* Password not empty
+
+### Step 2: Find user by email
+
+If not found:
+
+* Return 401 (Invalid credentials)
+
+### Step 3: Compare password using bcrypt.compare()
+
+If invalid:
+
+* Return 401
+
+### Step 4: Generate JWT
+
+JWT payload must include:
+
+```
+{
+  userId: string,
+  role: Role,
+  email: string
+}
+```
+
+Do NOT include:
+
+* Password
+* Sensitive internal fields
+
+---
+
+### Step 5: Set HTTP-only cookie
+
+Cookie settings:
+
+* httpOnly: true
+* secure: true (in production)
+* sameSite: strict
+* maxAge: 7 days
+
+---
+
+### Step 6: Return sanitized user object
+
+Return:
+
+```
+{
+  id,
+  name,
+  email,
+  role,
+  profileImageUrl
+}
+```
+
+---
+
+# 2.7 JWT Configuration
+
+JWT must:
+
+* Be signed with JWT_SECRET
+* Have expiration (7 days recommended)
+* Use HS256 algorithm
+
+If token expired:
+
+* Force re-login
+
+---
+
+# 2.8 Middleware Protection
+
+Create global middleware:
+
+```
+/middleware.ts
+```
+
+Middleware must:
+
+1. Check if route is protected
+2. Extract JWT from cookie
+3. Verify token
+4. Attach decoded user to request
+5. Redirect to login if invalid
+
+---
+
+Protected routes:
+
+```
+/dashboard/*
+/api/*
+(except auth routes)
+```
+
+---
+
+# 2.9 Role-Based Route Authorization
+
+Authentication ≠ Authorization.
+
+Even if logged in,
+you must check role.
+
+Example:
+
+If route is:
+
+```
+POST /api/admin/create-organiser
+```
+
+Backend must verify:
+
+```
+if (user.role !== ADMIN) {
+   return 403
+}
+```
+
+Frontend hiding button is NOT security.
+
+---
+
+# 2.10 Current User Retrieval
+
+Create helper function:
+
+```
+getCurrentUser()
+```
+
+This function must:
+
+1. Extract token from cookie
+2. Verify token
+3. Fetch fresh user from DB
+4. Return full user object
+
+This prevents stale token problems.
+
+---
+
+# 2.11 Logout Flow
+
+When user logs out:
+
+1. Clear cookie
+2. Invalidate session client-side
+3. Redirect to login
+
+No token blacklisting required (stateless system).
+
+---
+
+# 2.12 Admin Account Creation Flow
+
+When SUPERADMIN creates ADMIN:
+
+1. Validate SUPERADMIN role
+2. Create user with role ADMIN
+3. Generate temporary password
+4. Hash password
+5. Store in DB
+6. Send account email
+7. Force password change on first login (optional improvement)
+
+---
+
+When ADMIN creates ORGANISER:
+
+Same logic,
+but role must be ORGANISER.
+
+---
+
+# 2.13 Security Edge Cases to Handle
+
+Must prevent:
+
+* Token tampering
+* Privilege escalation
+* Role injection via frontend
+* Direct API calls from Postman without token
+* Accessing dashboard without login
+
+All must return proper 401 or 403.
+
+---
+
+# 2.14 Password Reset (Basic Structure Only)
+
+Even if not fully implemented now,
+structure must allow future:
+
+* Request reset token
+* Email reset link
+* Token expiration (15 min)
+* Hash reset token in DB
+
+Design schema extensible for this.
+
+---
+
+# 2.15 API Endpoints Required (Authentication)
+
+Must create:
+
+```
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/me
+```
+
+---
+
+### /register
+
+* Only creates USER
+* Hash password
+* Save profile photo URL
+
+---
+
+### /login
+
+* Validates credentials
+* Issues JWT cookie
+
+---
+
+### /logout
+
+* Clears cookie
+
+---
+
+### /me
+
+* Returns current authenticated user
+* Must verify token
+
+---
+
+# 2.16 Data Validation
+
+Use Zod or similar.
+
+Validate:
+
+* Email format
+* Password strength
+* Role assignment logic
+* Required fields
+
+Never trust request body directly.
+
+---
+
+# 2.17 Database Indexing for Auth
+
+Ensure:
+
+* Email is UNIQUE
+* Email indexed
+
+This prevents duplicate accounts and speeds login lookup.
+
+---
+
+# 2.18 Failure Response Standards
+
+Authentication errors:
+
+* 400 → Validation error
+* 401 → Invalid credentials
+* 403 → Forbidden (wrong role)
+* 500 → Internal server error
+
+Never expose:
+
+* Database errors
+* Stack traces
+* Internal queries
+
+---
+
+# 2.19 Final Directive for Copilot (For This Part)
+
+When generating authentication system:
+
+* Follow strict JWT architecture
+* Use HTTP-only cookies
+* Implement middleware protection
+* Enforce role-based access server-side
+* Never expose sensitive fields
+* Write clean modular auth utilities
+* Keep logic in service layer
+
+Do not generate event system yet.
+Do not generate QR system yet.
+Do not generate email templates yet.
+
+Authentication must be completed and stable before proceeding.
+
+---
+
+When you're ready, say **“next”**, and we will move to:
+
+🔷 PART 3 — Complete Database Schema & Relational Modeling (Deep Prisma-Level Specification)
+ Good.
+Now we design the **data backbone** of the entire system.
+
+This part is critical. If schema design is weak, everything breaks later.
+
+Below is:
+
+# 🔷 PART 3 — COMPLETE DATABASE SCHEMA & RELATIONAL MODELING (DEEP PRISMA-LEVEL SPECIFICATION)
+
+Paste this under Part 2 in your master spec.
+
+---
+
+# 3.1 Database Philosophy
+
+The database must:
+
+* Be fully relational
+* Use foreign keys
+* Enforce referential integrity
+* Avoid data duplication
+* Support scalability (10k+ users, 1k+ events)
+* Be optimized with indexes
+* Be future-proof
+
+All models must use:
+
+* UUID as primary key
+* Timestamps (`createdAt`, `updatedAt`)
+* Proper relations with `@relation`
+* Cascading delete where appropriate
+
+---
+
+# 3.2 Primary Entities Overview
+
+Core system entities:
+
+1. User
+2. College
+3. Event
+4. Registration
+5. Notification
+6. Bookmark
+
+Supporting structures:
+
+* Role enum
+* Optional future extensibility fields
+
+---
+
+# 3.3 ENUM DEFINITIONS
+
+These must exist in Prisma:
+
+```
+enum Role {
+  SUPERADMIN
+  ADMIN
+  ORGANISER
+  USER
+}
+```
+
+For Registration:
+
+```
+enum RegistrationStatus {
+  CONFIRMED
+  CANCELLED
+}
+```
+
+(We are NOT implementing payment verification, so no PENDING state required.)
+
+---
+
+# 3.4 MODEL: College
+
+Purpose:
+Represents a college/institution under which events and users exist.
+
+Structure:
+
+* id → UUID (primary key)
+* name → unique
+* createdAt
+* updatedAt
+
+Relationships:
+
+* One College has many Users
+* One College has many Events
+
+Constraints:
+
+* College name must be unique
+* Indexed for fast lookup
+
+Design rule:
+Deleting a college must NOT automatically delete users.
+Instead, restrict deletion if users exist.
+
+---
+
+# 3.5 MODEL: User
+
+This is the central identity entity.
+
+Fields:
+
+* id → UUID (primary key)
+* name
+* email → unique + indexed
+* password → hashed string
+* role → Role enum
+* profileImageUrl → string (NOT nullable, mandatory)
+* collegeId → foreign key
+* createdAt
+* updatedAt
+
+Relations:
+
+* Belongs to one College
+* Has many Events (if ORGANISER)
+* Has many Registrations
+* Has many Notifications
+* Has many Bookmarks
+
+Critical Constraints:
+
+* Email must be unique
+* profileImageUrl must not be null
+* role default must be USER
+* password must never be selected in public queries
+
+---
+
+# 3.6 MODEL: Event
+
+Represents an event created by an organiser.
+
+Fields:
+
+* id → UUID
+* title
+* description
+* bannerUrl (string)
+* date (DateTime)
+* venue
+* capacity (Int)
+* isPaid (Boolean)
+* organiserId (FK → User)
+* collegeId (FK → College)
+* createdAt
+* updatedAt
+
+Relations:
+
+* Belongs to one organiser (User)
+* Belongs to one college
+* Has many registrations
+* Has many bookmarks
+
+Critical Rules:
+
+* organiserId must reference a user with role ORGANISER
+* capacity must be positive
+* date must be future date at creation time
+
+Indexes required:
+
+* Index on date
+* Index on organiserId
+* Index on collegeId
+
+---
+
+# 3.7 MODEL: Registration
+
+This connects User and Event.
+
+This is a junction table with additional metadata.
+
+Fields:
+
+* id → UUID
+* userId → FK
+* eventId → FK
+* qrToken → unique string
+* attendanceMarked → Boolean (default false)
+* status → RegistrationStatus
+* createdAt
+* updatedAt
+
+Relations:
+
+* Belongs to one user
+* Belongs to one event
+
+Critical Constraints:
+
+* Composite unique constraint:
+  (userId, eventId)
+
+This prevents double registration.
+
+* qrToken must be unique
+* attendanceMarked default false
+
+Cascade Rules:
+
+If event is deleted → delete registrations
+If user is deleted → delete registrations
+
+---
+
+# 3.8 MODEL: Notification
+
+Purpose:
+Stores in-app notifications.
+
+Fields:
+
+* id → UUID
+* userId → FK
+* title
+* message
+* isRead → Boolean (default false)
+* createdAt
+* updatedAt
+
+Relations:
+
+* Belongs to one user
+
+Indexes:
+
+* Index on userId
+* Index on isRead
+
+Deleting user must cascade delete notifications.
+
+---
+
+# 3.9 MODEL: Bookmark
+
+Purpose:
+Allows users to bookmark events.
+
+Fields:
+
+* id → UUID
+* userId → FK
+* eventId → FK
+* createdAt
+
+Relations:
+
+* Belongs to one user
+* Belongs to one event
+
+Critical Constraint:
+
+Composite unique:
+(userId, eventId)
+
+Prevents duplicate bookmarks.
+
+Cascade:
+Delete event → delete bookmarks
+Delete user → delete bookmarks
+
+---
+
+# 3.10 RELATIONSHIP MAP (IMPORTANT)
+
+College
+↳ Users
+↳ Events
+
+User
+↳ Registrations
+↳ Notifications
+↳ Bookmarks
+↳ Events (if organiser)
+
+Event
+↳ Registrations
+↳ Bookmarks
+
+Registration
+↳ User
+↳ Event
+
+---
+
+# 3.11 Referential Integrity Rules
+
+Must use:
+
+* onDelete: Cascade (for child data like registrations, bookmarks)
+* onDelete: Restrict (for important parents like college)
+
+This ensures data consistency.
+
+---
+
+# 3.12 Query Performance Planning
+
+To support scalability:
+
+Add indexes on:
+
+User:
+
+* email
+
+Event:
+
+* date
+* organiserId
+* collegeId
+
+Registration:
+
+* userId
+* eventId
+* qrToken
+
+Notification:
+
+* userId
+* isRead
+
+Bookmark:
+
+* userId
+* eventId
+
+---
+
+# 3.13 Preventing Logical Errors via Schema
+
+Schema must prevent:
+
+* Double registration (composite unique)
+* Duplicate bookmarks (composite unique)
+* Duplicate emails (unique)
+* Duplicate QR tokens (unique)
+
+This ensures safety even if backend logic fails.
+
+---
+
+# 3.14 Data Expansion Readiness
+
+Schema must allow future expansion:
+
+Possible future additions:
+
+* Event categories
+* Event tags
+* Multi-college support
+* Payment fields
+* Analytics tracking
+* Attendance timestamp
+
+Design must not block these expansions.
+
+---
+
+# 3.15 Strict Prisma Requirements
+
+When generating schema:
+
+* Use `@id @default(uuid())`
+* Use `@default(now())`
+* Use `@updatedAt`
+* Use `@unique`
+* Use `@@unique([field1, field2])`
+* Define relations explicitly with `@relation`
+
+---
+
+# 3.16 Final Directive for Copilot (For This Part)
+
+When generating Prisma schema:
+
+* Follow exact model structure defined here
+* Include enums
+* Include all relations
+* Include all constraints
+* Include indexes
+* Use UUIDs
+* Use composite unique constraints
+* Use cascade deletes where specified
+* Make it production-ready
+
+Do not generate API routes yet.
+Do not generate event registration logic yet.
+Do not generate QR logic yet.
+
+Schema must be completed and migrated successfully before moving forward.
+
+---
+
+When you're ready, say **“next”**, and we move to:
+
+🔷 PART 4 — Complete Event System & Registration Workflow (Backend + Validation + Business Logic Deep Spec)
+
+Excellent.
+Now we design the **core business engine** of the platform.
+
+This part defines exactly how events are created, explored, registered, validated, and enforced.
+
+Below is:
+
+# 🔷 PART 4 — COMPLETE EVENT SYSTEM & REGISTRATION WORKFLOW (DETAILED BACKEND + BUSINESS LOGIC SPECIFICATION)
+
+Paste this under Part 3 in your master spec file.
+
+---
+
+# 4.1 Event System Philosophy
+
+The Event System must:
+
+* Be role-controlled
+* Be college-scoped
+* Prevent overbooking
+* Prevent duplicate registration
+* Be secure against direct API abuse
+* Be scalable
+* Separate UI from business logic
+
+All event-related logic must live in:
+
+```
+/services/event.service.ts
+/services/registration.service.ts
+```
+
+Route handlers must only validate input and call services.
+
+---
+
+# 4.2 Event Creation Flow (ORGANISER Only)
+
+## Endpoint
+
+```
+POST /api/events
+```
+
+---
+
+## Authorization Rules
+
+Only users with role:
+
+```
+ORGANISER
+```
+
+may create events.
+
+If role is not ORGANISER:
+Return 403.
+
+---
+
+## Validation Rules
+
+When creating an event, validate:
+
+* title: required, min 3 characters
+* description: required
+* date: must be in future
+* venue: required
+* capacity: integer > 0
+* bannerUrl: required
+* isPaid: boolean
+* collegeId must match organiser's collegeId
+
+Important:
+An organiser must NOT be able to create an event under a different college.
+
+Backend must enforce:
+
+```
+if (organiser.collegeId !== event.collegeId) {
+   reject
+}
+```
+
+---
+
+## Database Logic
+
+On success:
+
+* Insert new Event
+* Attach organiserId from authenticated user
+* Attach collegeId from organiser
+* Return created event
+
+---
+
+# 4.3 Event Update Flow
+
+Endpoint:
+
+```
+PATCH /api/events/:eventId
+```
+
+Rules:
+
+* Only organiser who created the event can edit
+* OR ADMIN of same college
+
+Backend validation must:
+
+1. Verify event exists
+2. Verify ownership or admin privileges
+3. Prevent editing after event date has passed
+
+---
+
+# 4.4 Event Deletion Flow
+
+Endpoint:
+
+```
+DELETE /api/events/:eventId
+```
+
+Rules:
+
+* Only organiser who created it
+* OR ADMIN of same college
+
+Deleting event must:
+
+* Cascade delete registrations
+* Cascade delete bookmarks
+* Not delete users
+
+---
+
+# 4.5 Explore Events System
+
+Endpoint:
+
+```
+GET /api/events
+```
+
+Features:
+
+* Pagination (mandatory)
+* Filter by:
+
+  * Upcoming
+  * Past
+  * College
+* Search by title
+
+Must return:
+
+* Basic event data
+* Registration count
+* Whether current user has registered
+* Whether current user has bookmarked
+
+Do NOT return:
+
+* Internal fields
+* Sensitive IDs not needed
+
+---
+
+# 4.6 Event Detail View
+
+Endpoint:
+
+```
+GET /api/events/:eventId
+```
+
+Return:
+
+* Full event details
+* Organiser name
+* College name
+* Registration count
+* Capacity remaining
+* Whether user is registered
+* Whether user bookmarked
+
+If event not found:
+Return 404.
+
+---
+
+# 4.7 Registration Workflow (USER Only)
+
+This is critical.
+
+Endpoint:
+
+```
+POST /api/events/:eventId/register
+```
+
+---
+
+## Step-by-Step Backend Logic
+
+### Step 1: Authenticate user
+
+Must be logged in.
+Role must be USER.
+
+If role is not USER:
+Return 403.
+
+---
+
+### Step 2: Validate event exists
+
+If not:
+Return 404.
+
+---
+
+### Step 3: Check event date
+
+If event.date < now:
+Reject with 400 (Event expired).
+
+---
+
+### Step 4: Check capacity
+
+Count current confirmed registrations.
+
+If count >= capacity:
+Reject with 400 (Event full).
+
+---
+
+### Step 5: Prevent double registration
+
+Check if:
+
+```
+Registration where userId + eventId exists
+```
+
+If exists:
+Return 400 (Already registered).
+
+Composite unique constraint should also enforce this.
+
+---
+
+### Step 6: Generate QR Token
+
+Generate secure UUID:
+
+```
+crypto.randomUUID()
+```
+
+Do NOT generate predictable tokens.
+Do NOT use incremental IDs.
+
+---
+
+### Step 7: Create Registration Record
+
+Insert:
+
+* userId
+* eventId
+* qrToken
+* status = CONFIRMED
+* attendanceMarked = false
+
+---
+
+### Step 8: Create Notification
+
+Insert:
+
+Title:
+
+```
+You're Registered 🎉
+```
+
+Message:
+Include event name and date.
+
+---
+
+### Step 9: Trigger Email
+
+Send confirmation email (defined in future part).
+
+---
+
+### Step 10: Return Success Response
+
+Return:
+
+* registrationId
+* qrToken
+* event details
+
+---
+
+# 4.8 User Dashboard — Registered Events
+
+Endpoint:
+
+```
+GET /api/users/me/registrations
+```
+
+Must return:
+
+* Upcoming events
+* Past events
+* Attendance status
+
+Data should include:
+
+* Event title
+* Date
+* Venue
+* Banner
+* attendanceMarked
+
+Must use optimized Prisma relations.
+
+---
+
+# 4.9 Attendance Marking Logic (Organiser)
+
+Endpoint:
+
+```
+POST /api/events/:eventId/attendance
+```
+
+Input:
+
+* qrToken
+
+Backend flow:
+
+1. Verify organiser owns event
+2. Find registration by qrToken + eventId
+3. If not found → reject
+4. If already marked → reject
+5. Update attendanceMarked = true
+6. Return user details:
+
+   * name
+   * profileImageUrl
+   * confirmation status
+
+---
+
+# 4.10 Capacity Integrity Under Concurrency
+
+Must prevent race conditions.
+
+When registering:
+
+Use transaction:
+
+1. Count registrations
+2. Insert registration
+3. Commit
+
+OR use:
+
+```
+SELECT FOR UPDATE logic via transaction
+```
+
+This prevents oversubscription under heavy load.
+
+---
+
+# 4.11 Bookmark Logic
+
+Endpoint:
+
+```
+POST /api/events/:eventId/bookmark
+```
+
+If bookmark exists:
+Delete it.
+Else:
+Create it.
+
+Must use composite unique constraint.
+
+---
+
+# 4.12 Preventing Logical Exploits
+
+System must prevent:
+
+* Registering via Postman without login
+* Registering twice by racing requests
+* Marking attendance for wrong event
+* Registering after deadline
+* Editing another organiser’s event
+* Creating event under wrong college
+
+All validations must exist server-side.
+
+---
+
+# 4.13 Performance Considerations
+
+When fetching event lists:
+
+* Use pagination (limit + offset or cursor)
+* Avoid N+1 queries
+* Use Prisma include/select properly
+* Avoid returning heavy nested relations unnecessarily
+
+---
+
+# 4.14 Error Handling Standards
+
+For event system:
+
+* 400 → Validation error
+* 401 → Not authenticated
+* 403 → Forbidden
+* 404 → Not found
+* 409 → Conflict (duplicate registration)
+* 500 → Internal error
+
+Never expose internal stack traces.
+
+---
+
+# 4.15 Final Directive for Copilot (For This Part)
+
+When generating event system:
+
+* Follow strict role enforcement
+* Use transactions for registration
+* Use UUID QR tokens
+* Prevent double registration
+* Prevent overbooking
+* Implement pagination
+* Separate services from route handlers
+* Follow REST conventions
+
+Do not generate QR image rendering yet.
+Do not generate email templates yet.
+Do not generate notification UI yet.
+
+Business logic must be stable before moving forward.
+
+---
+
+When you're ready, say **“next”**, and we will move to:
+
+🔷 PART 5 — QR Code Generation, Verification & Attendance System (Deep Security + Token Architecture Specification)
+Excellent.
+Now we design the **QR architecture properly** — not just generation, but secure verification, anti-tampering logic, and attendance integrity.
+
+This part must be implemented carefully. If QR logic is weak, attendance can be spoofed.
+
+Below is:
+
+# 🔷 PART 5 — QR CODE GENERATION, VERIFICATION & ATTENDANCE SYSTEM (DEEP SECURITY + TOKEN ARCHITECTURE SPECIFICATION)
+
+Paste this under Part 4 in your master spec file.
+
+---
+
+# 5.1 QR System Philosophy
+
+The QR system must:
+
+* Not expose sensitive data
+* Not store QR images in database
+* Not use predictable tokens
+* Prevent reuse after attendance marking
+* Be event-scoped
+* Be fast to verify
+* Be secure against manual tampering
+
+The QR code represents **a registration identity**, not a user identity.
+
+---
+
+# 5.2 What the QR Must Contain
+
+The QR code must encode:
+
+```
+registrationId + qrToken
+```
+
+Recommended format:
+
+```
+<registrationId>:<qrToken>
+```
+
+Example:
+
+```
+c8a2f1e2-9c3a-4f7c-91a1:4cbe22af-93dd-49e2-b8fa
+```
+
+DO NOT encode:
+
+* User email
+* User name
+* Event ID alone
+* Sequential numbers
+* JWT tokens
+
+Only registration-bound data.
+
+---
+
+# 5.3 QR Token Generation
+
+When registration is created:
+
+Generate:
+
+```
+const qrToken = crypto.randomUUID()
+```
+
+Store:
+
+* registrationId (UUID)
+* qrToken (UUID)
+* attendanceMarked = false
+
+qrToken must be:
+
+* Unique
+* Indexed
+* Non-predictable
+
+Database must enforce:
+
+```
+@unique
+```
+
+---
+
+# 5.4 QR Image Generation
+
+QR image must:
+
+* Be generated dynamically (not stored in DB)
+* Can be generated using:
+
+  * qrcode npm package
+* Generated:
+
+  * On registration
+  * Or on-demand via endpoint
+
+Two acceptable approaches:
+
+### Option A (Recommended):
+
+Generate QR when user opens event page.
+
+Endpoint:
+
+```
+GET /api/registrations/:registrationId/qr
+```
+
+Backend:
+
+* Verify user owns registration
+* Generate QR image (PNG or SVG)
+* Return as image stream
+
+Do NOT store QR image permanently.
+
+---
+
+# 5.5 QR Display in User Dashboard
+
+On “My Registered Events” page:
+
+For each event:
+
+* Show event info
+* Show QR button
+* Clicking opens QR modal
+* QR is fetched from backend
+
+User must not see raw token text.
+Only QR visual.
+
+---
+
+# 5.6 Attendance Verification Flow (Organiser Scanner)
+
+Organiser Dashboard route:
+
+```
+/dashboard/scan/[eventId]
+```
+
+Only accessible to:
+
+* ORGANISER who owns event
+* OR ADMIN of same college
+
+Must block all other roles.
+
+---
+
+# 5.7 Scanner Logic
+
+Scanner page:
+
+* Uses camera
+* Scans QR
+* Extracts raw string
+* Sends to backend
+
+Endpoint:
+
+```
+POST /api/events/:eventId/verify-attendance
+```
+
+Body:
+
+```
+{
+  qrData: "<registrationId>:<qrToken>"
+}
+```
+
+---
+
+# 5.8 Backend Verification Logic (CRITICAL)
+
+Step-by-step:
+
+### Step 1: Authenticate organiser
+
+Must own event or be admin of same college.
+
+If not:
+Return 403.
+
+---
+
+### Step 2: Parse QR data
+
+Split string by “:”
+
+If invalid format:
+Return 400.
+
+---
+
+### Step 3: Find registration
+
+Query:
+
+```
+where:
+  id = registrationId
+  AND qrToken = qrToken
+  AND eventId = eventId
+```
+
+If not found:
+Return 404 (Invalid QR).
+
+---
+
+### Step 4: Check attendance status
+
+If attendanceMarked = true:
+Return 409 (Already marked present).
+
+---
+
+### Step 5: Mark attendance
+
+Update:
+
+```
+attendanceMarked = true
+attendanceMarkedAt = now() (optional future field)
+```
+
+---
+
+### Step 6: Return verification response
+
+Return:
+
+```
+{
+  success: true,
+  userName,
+  profileImageUrl,
+  eventTitle,
+  status: "Attendance Marked"
+}
+```
+
+Organiser UI should show:
+
+* User photo
+* Green success state
+* Clear confirmation message
+
+---
+
+# 5.9 Anti-Tampering Protection
+
+Must protect against:
+
+* QR screenshot reuse
+* Token guessing
+* Manual API brute-force
+
+Protection strategies:
+
+1. Use UUID tokens (unguessable)
+2. Require BOTH:
+
+   * registrationId
+   * qrToken
+3. Verify eventId matches
+4. Only allow authorised organiser to verify
+5. Return minimal error details
+
+---
+
+# 5.10 Concurrency Protection
+
+If two scans happen simultaneously:
+
+* Use atomic update
+* Only mark attendance if attendanceMarked = false
+
+Example logic:
+
+```
+update where id AND attendanceMarked = false
+```
+
+If update count = 0:
+Return already marked.
+
+---
+
+# 5.11 Performance Considerations
+
+Indexes required:
+
+* registrationId (primary key)
+* qrToken (unique)
+* eventId
+* attendanceMarked
+
+Verification query must be O(1) lookup.
+
+---
+
+# 5.12 Edge Cases to Handle
+
+Must reject:
+
+* QR scanned for wrong event
+* QR reused after attendance
+* QR belonging to another college
+* QR belonging to deleted event
+* Invalid format string
+
+Must return proper HTTP codes.
+
+---
+
+# 5.13 Security Requirements
+
+* QR verification endpoint must NOT be public
+* Must require JWT
+* Must verify organiser role
+* Must verify event ownership
+
+Never expose:
+
+* Full registration record
+* Internal IDs not needed
+
+---
+
+# 5.14 Optional Future Enhancements (Structure-Ready)
+
+System design must allow:
+
+* Attendance timestamp
+* Check-in window restriction
+* Check-out logic
+* Multi-day events
+* QR expiration after event date
+
+But do NOT implement now.
+
+---
+
+# 5.15 Final Directive for Copilot (For This Part)
+
+When implementing QR system:
+
+* Use UUID tokens
+* Never store QR images in DB
+* Generate QR dynamically
+* Validate both registrationId and qrToken
+* Use secure role-based verification
+* Prevent double attendance
+* Use atomic updates
+* Follow RESTful patterns
+
+Do not implement email reminder system yet.
+Do not implement notification UI yet.
+Do not implement cron scheduling yet.
+
+QR system must be stable and secure before moving forward.
+
+---
+
+When you're ready, say **“next”**, and we will move to:
+
+🔷 PART 6 — Email System (Account Creation, Event Confirmation, 24-Hour Reminder) + Notification Engine Deep Specification
+Excellent.
+Now we design the **communication layer** of the system — transactional emails + in-app notifications.
+
+This must be reliable, structured, and production-safe.
+
+Below is:
+
+# 🔷 PART 6 — EMAIL SYSTEM (ACCOUNT + EVENT CONFIRMATION + 24HR REMINDER) & NOTIFICATION ENGINE (DEEP SPECIFICATION)
+
+Paste this under Part 5 in your master spec file.
+
+---
+
+# 6.1 Communication System Philosophy
+
+The system must support:
+
+1. Transactional emails (external communication)
+2. In-app notifications (internal communication)
+
+Both systems must:
+
+* Be triggered from backend only
+* Be modular
+* Be reusable
+* Be non-blocking (do not crash registration flow if email fails)
+* Be template-driven
+* Support placeholders
+
+Email failures must not break core logic.
+
+---
+
+# 6.2 Email Architecture Overview
+
+All email logic must live in:
+
+```
+/lib/mail.ts
+/services/email.service.ts
+```
+
+Route handlers must NEVER directly send emails.
+
+Instead:
+
+```
+registration.service → email.service
+```
+
+---
+
+# 6.3 Email Transport Configuration
+
+Use:
+
+* Nodemailer
+* SMTP credentials from environment variables
+
+Environment variables required:
+
+```
+SMTP_HOST
+SMTP_PORT
+SMTP_USER
+SMTP_PASS
+SMTP_FROM
+```
+
+Never hardcode credentials.
+
+---
+
+# 6.4 Email Types Required
+
+The system must support 3 types of emails:
+
+1. Admin Account Creation Email
+2. Event Registration Confirmation Email
+3. 24-Hour Event Reminder Email
+
+Each must have:
+
+* Subject
+* Structured HTML template
+* Placeholder injection
+* Consistent styling
+* Branded footer
+
+---
+
+# 6.5 Email Type 1 — Admin Account Creation
+
+Triggered when:
+
+* SUPERADMIN creates ADMIN
+* ADMIN creates ORGANISER
+
+Trigger point:
+Immediately after user creation.
+
+---
+
+## Required Template Placeholders
+
+```
+{{name}}
+{{email}}
+{{temporaryPassword}}
+{{collegeName}}
+```
+
+---
+
+## Subject
+
+```
+Your Admin Account Details
+```
+
+---
+
+## Email Body Requirements
+
+Must include:
+
+* Greeting with name
+* College reference
+* Login credentials
+* Login instructions
+* Security note to change password
+* Professional tone
+
+Must NOT include:
+
+* Internal IDs
+* JWT tokens
+
+---
+
+# 6.6 Email Type 2 — Event Registration Confirmation
+
+Triggered when:
+
+* USER successfully registers for event
+
+Trigger point:
+After registration record is created.
+
+---
+
+## Subject
+
+```
+You're Registered 🎉
+```
+
+---
+
+## Tone Requirement
+
+Must start with a Gen-Z style hook.
+
+Example tone (structure requirement, not exact wording):
+
+* Excited opening
+* Celebration energy
+* Friendly tone
+* Not unprofessional
+
+---
+
+## Required Template Placeholders
+
+```
+{{userName}}
+{{eventTitle}}
+{{eventDate}}
+{{eventVenue}}
+{{collegeName}}
+{{qrImageInlineOrLink}}
+```
+
+---
+
+## Email Content Must Include
+
+* Confirmation message
+* Event details
+* QR instructions
+* Reminder to carry QR
+* Footer with college branding
+
+QR may be:
+
+* Inline embedded image
+  OR
+* Link to dashboard
+
+Do NOT expose raw token text.
+
+---
+
+# 6.7 Email Type 3 — 24-Hour Reminder Email
+
+Triggered:
+
+24 hours before event start time.
+
+This requires scheduled job logic.
+
+---
+
+## Reminder System Architecture
+
+Must support:
+
+* Cron-based job
+* Background process
+* Scheduled server function
+
+Do NOT run reminder logic in frontend.
+
+---
+
+## Reminder Logic Flow
+
+Daily scheduled job:
+
+1. Query events happening in next 24 hours
+2. Find all registrations
+3. Send reminder email to each registered user
+4. Create in-app notification
+5. Log email attempt
+
+---
+
+## Reminder Subject
+
+```
+Tomorrow’s the Big Day 🚀
+```
+
+---
+
+## Tone Requirements
+
+* Energetic
+* Countdown vibe
+* Friendly
+* Motivational
+
+---
+
+## Required Template Placeholders
+
+```
+{{userName}}
+{{eventTitle}}
+{{eventDate}}
+{{eventVenue}}
+```
+
+---
+
+# 6.8 Email Template System Design
+
+Email templates must:
+
+* Be stored as functions
+* Accept dynamic data
+* Return HTML string
+
+Example structure:
+
+```
+generateRegistrationEmail(data)
+generateAdminAccountEmail(data)
+generateReminderEmail(data)
+```
+
+Do NOT hardcode HTML inside route handlers.
+
+---
+
+# 6.9 Email Sending Reliability Rules
+
+When sending email:
+
+* Use try/catch
+* Log failure
+* Do NOT throw fatal error
+* Continue main flow
+
+Registration success must NOT depend on email success.
+
+---
+
+# 6.10 In-App Notification System
+
+Every important email must also generate a Notification record.
+
+Notification triggers:
+
+* Registration success
+* 24-hour reminder
+* Admin account creation
+* Event cancellation (future-ready)
+* Event update (future-ready)
+
+---
+
+# 6.11 Notification Model Behavior
+
+Notifications must:
+
+* Be tied to userId
+* Have title
+* Have message
+* Have isRead flag
+* Have createdAt timestamp
+
+---
+
+# 6.12 Notification API Endpoints
+
+Must create:
+
+```
+GET  /api/notifications
+PATCH /api/notifications/:id/read
+PATCH /api/notifications/read-all
+```
+
+All require authentication.
+
+---
+
+# 6.13 Notification Retrieval Logic
+
+When fetching notifications:
+
+* Sort by createdAt DESC
+* Paginate
+* Return unread count
+
+---
+
+# 6.14 Scheduled Reminder System Requirements
+
+Must support:
+
+* Cron job (e.g., node-cron)
+  OR
+* Platform scheduled function
+
+Reminder job must:
+
+1. Run every hour
+2. Check for events starting in next 24 hours ± 30 minutes window
+3. Avoid sending duplicate reminders
+
+To avoid duplicates:
+
+Add field in Registration:
+
+```
+reminderSent: Boolean (default false)
+```
+
+When reminder sent:
+Set reminderSent = true
+
+---
+
+# 6.15 Email Logging (Optional but Structured)
+
+System must allow future:
+
+EmailLog model:
+
+* id
+* userId
+* emailType
+* status (SENT / FAILED)
+* createdAt
+
+Not mandatory now but design must allow it.
+
+---
+
+# 6.16 Security Requirements
+
+Must:
+
+* Sanitize email inputs
+* Validate recipient exists
+* Prevent email header injection
+* Avoid exposing SMTP credentials
+
+Never log:
+
+* SMTP password
+* Full email body in production logs
+
+---
+
+# 6.17 Performance Considerations
+
+If event has 1,000 users:
+
+Reminder system must:
+
+* Batch emails
+* Avoid blocking main server thread
+* Possibly queue in future
+
+Design must not tightly couple reminder sending to request lifecycle.
+
+---
+
+# 6.18 Error Handling Standards
+
+If email fails:
+
+* Log error
+* Continue system flow
+* Return success to user (unless account creation critical)
+
+If reminder job fails:
+
+* Retry next cycle
+* Avoid duplicate sending
+
+---
+
+# 6.19 Final Directive for Copilot (For This Part)
+
+When implementing email system:
+
+* Use modular template functions
+* Use Nodemailer with env config
+* Separate email service layer
+* Never block registration on email failure
+* Implement scheduled reminder logic
+* Implement reminderSent flag logic
+* Create notification records for every email
+* Keep communication system decoupled from business logic
+
+Do not implement UI notification components yet.
+Do not implement analytics yet.
+Do not implement advanced queuing system yet.
+
+Communication layer must be stable before UI polish.
+
+---
+
+When you're ready, say **“next”**, and we will move to:
+
+🔷 PART 7 — Dashboard Architecture, UI Behavior Rules, Route Structure & Frontend-State Management Deep Specification
+## PART 7 — Attendance QR Logic, Real-Time Flow & Validation Engine (Deep Implementation Spec)
+
+This part defines the **core business logic** of your system:
+
+* How QR codes are generated
+* How they expire
+* How students scan
+* How validation works
+* How duplicate prevention works
+* How attendance is stored safely
+* How to prevent fraud
+* How to handle edge cases
+
+This is the heart of the system.
+
+---
+
+# 1️⃣ Attendance Flow Overview (System-Level Architecture)
+
+Actors:
+
+* Admin (creates session)
+* Student (scans QR)
+* Server (validates & records)
+* Database (stores state)
+
+Flow:
+
+1. Admin creates a lecture session
+2. System generates a **time-bound secure QR token**
+3. QR is displayed in classroom
+4. Student scans QR
+5. Student authenticates (if not already)
+6. Student sends token to backend
+7. Backend validates:
+
+   * Session exists
+   * Session active
+   * QR not expired
+   * Student enrolled in course
+   * Student not already marked present
+8. Attendance record inserted
+9. Student receives confirmation
+
+---
+
+# 2️⃣ Database Schema (Attendance-Critical Fields)
+
+We extend earlier schema with precise constraints.
+
+### AttendanceSession
+
+Must include:
+
+* id (UUID)
+* courseId
+* createdByAdminId
+* startTime (timestamp)
+* endTime (timestamp)
+* qrSecret (random 64-byte hex string)
+* qrExpiresAt (timestamp)
+* status (SCHEDULED | ACTIVE | CLOSED)
+
+Index:
+
+* Index on (courseId, status)
+* Index on qrExpiresAt
+
+---
+
+### Attendance
+
+Fields:
+
+* id (UUID)
+* sessionId
+* studentId
+* scannedAt (timestamp)
+* ipAddress (optional)
+* userAgent (optional)
+* deviceFingerprint (optional)
+
+Constraints:
+
+UNIQUE(sessionId, studentId)
+
+This prevents duplicate attendance at database level.
+
+---
+
+# 3️⃣ QR Code Design (Security Model)
+
+DO NOT store plain session ID in QR.
+
+Instead generate a signed payload.
+
+### QR Payload Structure (JSON)
+
+```
+{
+  "sessionId": "uuid",
+  "exp": 1700000000,
+  "nonce": "randomString",
+  "signature": "HMAC-SHA256"
+}
+```
+
+Where:
+
+* exp = expiration timestamp (unix seconds)
+* nonce = random unique value
+* signature = HMAC(secretKey, sessionId + exp + nonce)
+
+Secret key stored in server environment variable.
+
+Example:
+
+```
+ATTENDANCE_QR_SECRET=super-long-random-key
+```
+
+---
+
+# 4️⃣ QR Generation Logic (Server Side)
+
+When admin clicks "Start Session":
+
+1. Update session:
+
+   * status = ACTIVE
+   * startTime = now()
+   * qrExpiresAt = now() + 10 minutes
+   * qrSecret = random 64-byte string
+
+2. Create payload:
+
+```
+data = sessionId + expiration + nonce
+signature = HMAC_SHA256(data, ENV_SECRET)
+```
+
+3. Create JSON payload
+4. Convert to Base64
+5. Generate QR using library
+
+Recommended library for Next.js:
+
+```
+qrcode
+```
+
+Example:
+
+```ts
+import QRCode from 'qrcode'
+
+const qrDataUrl = await QRCode.toDataURL(payloadString)
+```
+
+Return to frontend.
+
+---
+
+# 5️⃣ Student Scan Flow
+
+On scan:
+
+1. Student camera reads QR
+2. QR returns base64 string
+3. Decode base64 → JSON
+4. Send entire payload to backend:
+
+POST /api/attendance/scan
+
+Body:
+
+```
+{
+  payload: "...base64String"
+}
+```
+
+---
+
+# 6️⃣ Attendance Validation Algorithm (CRITICAL SECTION)
+
+Backend must:
+
+### Step 1: Decode payload
+
+Parse JSON safely.
+Reject if malformed.
+
+---
+
+### Step 2: Validate expiration
+
+```
+if (currentTime > payload.exp) → reject
+```
+
+Return:
+
+```
+QR code expired
+```
+
+---
+
+### Step 3: Validate signature
+
+Recreate:
+
+```
+expectedSignature = HMAC(sessionId + exp + nonce, ENV_SECRET)
+```
+
+Compare with payload.signature.
+
+If mismatch → reject (possible tampering).
+
+---
+
+### Step 4: Fetch session
+
+Find session by sessionId.
+
+Reject if:
+
+* Not found
+* status != ACTIVE
+* now() > session.endTime
+
+---
+
+### Step 5: Validate student enrollment
+
+Check Enrollment table:
+
+```
+where studentId = currentUser.id
+and courseId = session.courseId
+```
+
+If not found → reject.
+
+---
+
+### Step 6: Prevent duplicate attendance
+
+Before insert:
+
+Check:
+
+```
+Attendance.findUnique({
+  where: {
+    sessionId_studentId: {
+      sessionId,
+      studentId
+    }
+  }
+})
+```
+
+If exists → return:
+
+"Already marked present"
+
+---
+
+### Step 7: Insert Attendance
+
+Create record:
+
+* sessionId
+* studentId
+* scannedAt = now()
+* ipAddress (optional)
+* userAgent (optional)
+
+---
+
+### Step 8: Return success
+
+Response:
+
+```
+{
+  success: true,
+  message: "Attendance marked successfully"
+}
+```
+
+---
+
+# 7️⃣ Anti-Fraud Strategies
+
+You must implement these:
+
+---
+
+## 1. Short Expiry (10–15 minutes)
+
+QR expires quickly.
+Prevents screenshot sharing.
+
+---
+
+## 2. Optional Device Binding
+
+Store deviceFingerprint in Attendance.
+
+Generate using:
+
+* userAgent
+* screen resolution
+* timezone
+
+Optional but increases integrity.
+
+---
+
+## 3. IP Logging
+
+Store IP address.
+Admin dashboard can flag:
+
+* Multiple students same IP
+* Suspicious patterns
+
+---
+
+## 4. Optional Rolling QR (Advanced Mode)
+
+Every 30 seconds:
+
+* Generate new nonce
+* Regenerate QR
+* Keep same session
+
+This prevents forwarding.
+
+This is advanced and optional.
+
+---
+
+# 8️⃣ Session State Machine
+
+AttendanceSession.status:
+
+SCHEDULED → ACTIVE → CLOSED
+
+Rules:
+
+* Only ACTIVE sessions accept scans
+* CLOSED sessions reject
+* Scheduled sessions reject
+
+When admin clicks "End Session":
+
+* status = CLOSED
+* endTime = now()
+
+---
+
+# 9️⃣ Real-Time Updates (Optional Enhancement)
+
+Use:
+
+* WebSockets (Socket.IO)
+  or
+* Server-Sent Events
+
+Admin dashboard can show:
+
+* Live attendance count
+* List of students marked present
+* Late entries
+
+This is optional but recommended.
+
+---
+
+# 🔟 Error Handling Matrix
+
+| Case              | Result           |
+| ----------------- | ---------------- |
+| Invalid signature | 401 Unauthorized |
+| Expired QR        | 400 Bad Request  |
+| Not enrolled      | 403 Forbidden    |
+| Already marked    | 409 Conflict     |
+| Session closed    | 400 Bad Request  |
+
+Return structured JSON always.
+
+---
+
+# 1️⃣1️⃣ Performance Considerations
+
+* Add DB index on Attendance(sessionId)
+* Use Prisma transactions if needed
+* Keep payload small (< 1KB)
+* Avoid heavy joins in scan endpoint
+
+Expected performance:
+Should handle 200+ scans per minute easily.
+
+---
+
+# 1️⃣2️⃣ Security Checklist
+
+You must:
+
+* Store secret in .env
+* Never expose secret to frontend
+* Use HTTPS only
+* Validate all inputs
+* Rate limit scan endpoint
+* Add CSRF protection
+
+---
+
+# 1️⃣3️⃣ Edge Cases to Handle
+
+* Student scans after expiration
+* Student scans before session active
+* Admin ends session mid-scan
+* Same student scans twice rapidly
+* Payload manually modified
+
+All must be handled safely.
+
+---
+
+# 1️⃣4️⃣ Final Architecture for Attendance System
+
+Frontend:
+
+* QR display page (admin)
+* Scan page (student)
+
+Backend:
+
+* Start session endpoint
+* Scan endpoint
+* End session endpoint
+* Get attendance list endpoint
+
+Database:
+
+* Strict constraints
+* Unique composite keys
+* Indexed lookups
+
+---
+
+This completes the full attendance engine design.
+
+When you're ready, say **next**, and we will move to:
+
+PART 8 — Admin Dashboard Architecture, Analytics, Reporting, Export (CSV/Excel), and Monitoring System Design.
+
+## PART 8 — Admin Dashboard Architecture, Analytics Engine, Reporting & Monitoring System
+
+This section defines the **complete administrative control layer** of your attendance system.
+
+We will design:
+
+* Dashboard architecture
+* Metrics engine
+* Attendance analytics
+* Filtering & search
+* CSV/Excel export
+* Student performance tracking
+* Monitoring & anomaly detection
+* Role-based visibility
+
+This is a full enterprise-level admin system design.
+
+---
+
+# 1️⃣ Admin Dashboard System Overview
+
+The Admin Dashboard must provide:
+
+1. Course overview
+2. Session management
+3. Live attendance tracking
+4. Historical reports
+5. Student analytics
+6. Export functionality
+7. Integrity monitoring
+
+Only users with role `ADMIN` can access.
+
+Route structure in Next.js:
+
+```
+/admin
+/admin/courses
+/admin/courses/[courseId]
+/admin/courses/[courseId]/sessions
+/admin/sessions/[sessionId]
+/admin/reports
+/admin/students
+```
+
+Protect all routes with middleware role validation.
+
+---
+
+# 2️⃣ Dashboard Home (Overview Page)
+
+Purpose: Quick system snapshot.
+
+Metrics to display:
+
+* Total Courses
+* Total Students
+* Total Sessions
+* Total Attendance Records
+* Average Attendance Rate
+* Active Sessions (live)
+
+All values computed using Prisma aggregation.
+
+Example logic:
+
+```
+attendanceRate = totalAttendance / (totalSessions * enrolledStudents)
+```
+
+Visualizations:
+
+* Line chart: attendance trend over time
+* Bar chart: course-wise attendance
+* Pie chart: present vs absent ratio
+
+Use:
+
+* Recharts (recommended for Next.js)
+  or
+* Chart.js
+
+---
+
+# 3️⃣ Course Management Panel
+
+Admin can:
+
+* Create course
+* Edit course
+* Archive course
+* View enrolled students
+* View session history
+
+For each course display:
+
+* Course name
+* Enrolled count
+* Total sessions
+* Average attendance %
+
+Average Attendance Formula:
+
+```
+average = (total attendance records for course)
+          / (total sessions * enrolled students)
+```
+
+Display percentage with 2 decimal precision.
+
+---
+
+# 4️⃣ Session Management Interface
+
+For each course:
+
+Admin can:
+
+* Create new session
+* Start session (generate QR)
+* End session
+* View attendance list
+
+Session Detail Page:
+
+Show:
+
+* Start time
+* End time
+* Duration
+* Total students present
+* Absent count
+* Attendance percentage
+
+Calculation:
+
+```
+attendance% = (present / total enrolled) * 100
+```
+
+Add status badge:
+
+* Scheduled
+* Active
+* Closed
+
+---
+
+# 5️⃣ Live Attendance Monitoring (Real-Time)
+
+When session is ACTIVE:
+
+Admin page should:
+
+* Auto-refresh every 5 seconds
+  OR
+* Use WebSockets
+
+Display:
+
+* List of students marked present
+* Timestamp of scan
+* Total count (updates live)
+
+Optional:
+
+Highlight late entries (e.g., scanned after 10 minutes).
+
+---
+
+# 6️⃣ Student Analytics Engine
+
+Create dedicated page:
+
+```
+/admin/students/[studentId]
+```
+
+Show:
+
+* Student profile
+* Courses enrolled
+* Total sessions attended
+* Total sessions missed
+* Attendance percentage per course
+
+Per-course calculation:
+
+```
+studentAttendance = attendedSessions / totalSessionsForCourse
+```
+
+Mark:
+
+* Below 75% attendance (warning)
+* Below 50% attendance (critical)
+
+Use conditional styling.
+
+---
+
+# 7️⃣ Advanced Filtering System
+
+On reports page:
+
+Allow filtering by:
+
+* Course
+* Date range
+* Student
+* Attendance percentage threshold
+* Session status
+
+Query example using Prisma:
+
+```
+where: {
+  courseId,
+  session: {
+    startTime: {
+      gte: startDate,
+      lte: endDate
+    }
+  }
+}
+```
+
+Implement pagination for large datasets.
+
+---
+
+# 8️⃣ CSV & Excel Export System
+
+Admin must export:
+
+* Session attendance
+* Course attendance summary
+* Student report
+
+Use server-side export endpoint.
+
+Example route:
+
+```
+/api/admin/export/session/[sessionId]
+```
+
+Generate CSV:
+
+Columns:
+
+* Student Name
+* Email
+* Scan Time
+* Status (Present/Absent)
+
+For absent students:
+Generate rows manually by checking enrolled but not in attendance.
+
+Use:
+
+* json2csv package
+  or
+* manually generate CSV string
+
+Set response headers:
+
+```
+Content-Type: text/csv
+Content-Disposition: attachment; filename="attendance.csv"
+```
+
+---
+
+# 9️⃣ Attendance Summary Report Logic
+
+Course Summary Report:
+
+For each student:
+
+* Total sessions
+* Sessions attended
+* Attendance %
+* Status (Good/Warning/Critical)
+
+Status thresholds:
+
+* > = 75% → Good
+* 50–74% → Warning
+* < 50% → Critical
+
+---
+
+# 🔟 Monitoring & Integrity Dashboard
+
+Create page:
+
+```
+/admin/monitoring
+```
+
+Detect anomalies such as:
+
+1. Multiple students from same IP in <10 seconds
+2. Duplicate device fingerprints
+3. Rapid scans (<1 second apart)
+4. Suspicious late-night sessions
+5. Students scanning outside typical time range
+
+Query patterns:
+
+Group attendance by ipAddress.
+Count occurrences.
+
+Flag if:
+
+```
+count > 5 within 30 seconds
+```
+
+Display suspicious entries in red.
+
+---
+
+# 1️⃣1️⃣ Attendance Heatmap (Optional Advanced)
+
+Visualize attendance by:
+
+* Day of week
+* Hour of day
+
+Use aggregated queries:
+
+Group by day(session.startTime)
+
+Show pattern:
+
+Example insights:
+
+* Mondays lowest attendance
+* Morning sessions higher participation
+
+---
+
+# 1️⃣2️⃣ Performance Optimization
+
+For reporting efficiency:
+
+Add DB indexes:
+
+* Attendance(sessionId)
+* Attendance(studentId)
+* Attendance(scannedAt)
+* Session(courseId)
+* Session(startTime)
+
+For large datasets:
+
+* Use Prisma aggregate instead of fetching raw rows
+* Avoid N+1 queries
+* Use include/select wisely
+
+---
+
+# 1️⃣3️⃣ Authorization Matrix
+
+| Action         | ADMIN | STUDENT |
+| -------------- | ----- | ------- |
+| View dashboard | Yes   | No      |
+| Start session  | Yes   | No      |
+| Scan QR        | No    | Yes     |
+| View reports   | Yes   | No      |
+| Export CSV     | Yes   | No      |
+
+Enforce in middleware and API routes.
+
+---
+
+# 1️⃣4️⃣ Admin UI/UX Design Guidelines
+
+Use:
+
+* Sidebar layout
+* Breadcrumb navigation
+* Status badges
+* Data tables with sorting
+* Search bars
+* Export buttons top-right
+
+Ensure:
+
+* Mobile responsiveness
+* Clear success/error notifications
+* Confirmation dialog before ending session
+
+---
+
+# 1️⃣5️⃣ System Logging
+
+Create server logs for:
+
+* Session started
+* Session ended
+* Attendance marked
+* Failed validation attempts
+* Suspicious activity
+
+Store logs optionally in:
+
+Database table:
+
+```
+SystemLog
+- id
+- action
+- userId
+- metadata
+- createdAt
+```
+
+Or external logging service (advanced).
+
+---
+
+# 1️⃣6️⃣ Scalability Considerations
+
+If system grows:
+
+* Add Redis caching for dashboard metrics
+* Add pagination everywhere
+* Add background jobs for heavy reports
+* Consider read replicas for Postgres
+
+Expected scale capacity:
+
+* 10,000+ students
+* 1M+ attendance records
+* With proper indexing, performance remains stable
+
+---
+
+# 1️⃣7️⃣ Final Admin System Summary
+
+The Admin layer must provide:
+
+* Operational control
+* Analytical insight
+* Data export capability
+* Fraud detection visibility
+* Performance monitoring
+
+It is not just CRUD — it is a decision-support system.
+
+---
+
+This completes the full system specification of:
+
+* Auth
+* Database
+* QR Engine
+* Attendance validation
+* Admin analytics
+* Monitoring
+* Reporting
+* Export system
+
+If you want, we can now move to:
+
+* Deployment architecture (Vercel + Neon + production setup)
+* OR Testing strategy (unit + integration + load testing)
+* OR Prisma schema full final version
+* OR Full API endpoint specification file
+* OR Folder structure final blueprint
+
+
+**Important**
+
+also keep these things at low priority(dont focus on this now)
+
+Device Fingerprinting
+
+IP Address Logging
+
+Rolling QR (auto-rotating every 30s)
+
+Suspicious Activity Monitoring Dashboard
+
+Fraud Detection Rules Engine
+
+SystemLog Table
+
+Attendance Heatmap Analytics
+
+Advanced Student Risk Classification (Good/Warning/Critical)
+
+Live WebSocket Attendance Updates
+
+Performance Optimization via Redis
+
+Background Job System for Reports
+
+Read Replica Scaling Strategy
+
+Anomaly Detection by Time Pattern
+
+Rapid-Scan Detection Logic
+
+Device/IP Collision Analysis
+
+Advanced Dashboard Charts (trend, pie, heatmap)
+
+Monitoring Page
+
+Detailed Integrity Metrics Engine
