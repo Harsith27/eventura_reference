@@ -3,71 +3,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  status: string;
-  profileImage?: string | null;
-}
-
-interface RegisteredItem {
-  id: string;
-  status: string;
-  event: {
-    id: string;
-    eventCode?: string;
-    title: string;
-    date: string;
-    venue: string;
-    bannerUrl?: string;
-    capacity?: number;
-  };
-}
-
-interface BookmarkItem {
-  id: string;
-  event: {
-    id: string;
-    eventCode?: string;
-    title: string;
-    description?: string;
-    date: string;
-    venue: string;
-    bannerUrl?: string;
-    capacity?: number;
-    _count?: {
-      registrations?: number;
-    };
-  };
-}
-
-interface EventCard {
-  id: string;
-  eventCode?: string;
-  title: string;
-  description?: string;
-  date: string;
-  venue: string;
-  bannerUrl?: string;
-  registrationsCount: number;
-}
+import EventPreviewCard from '@/components/EventPreviewCard';
+import type { AppUser } from '@/lib/app-types';
+import type { BookmarkItem, EventCardItem, RegisteredItem } from '@/lib/event-types';
 
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [registeredEvents, setRegisteredEvents] = useState<RegisteredItem[]>([]);
   const [savedEvents, setSavedEvents] = useState<BookmarkItem[]>([]);
   const [activeTab, setActiveTab] = useState<'registered' | 'saved'>('registered');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'popularity'>('date');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'past'>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -126,7 +75,7 @@ export default function Dashboard() {
     return null;
   }
 
-  const getBaseEvents = (): EventCard[] => {
+  const getBaseEvents = (): EventCardItem[] => {
     if (activeTab === 'registered') {
       return registeredEvents.map((item) => ({
         id: item.event.id,
@@ -154,33 +103,12 @@ export default function Dashboard() {
   const filteredEvents = getBaseEvents()
     .filter((event) => {
       const query = searchQuery.trim().toLowerCase();
-      const matchesSearch =
+      return (
         query.length === 0 ||
         event.title.toLowerCase().includes(query) ||
         event.venue.toLowerCase().includes(query) ||
-        (event.description || '').toLowerCase().includes(query);
-
-      if (!matchesSearch) {
-        return false;
-      }
-
-      if (statusFilter === 'all') {
-        return true;
-      }
-
-      const eventDate = new Date(event.date);
-      const now = new Date();
-      const eventEndTime = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000);
-
-      if (statusFilter === 'upcoming') {
-        return eventDate > now;
-      }
-
-      if (statusFilter === 'ongoing') {
-        return now >= eventDate && now <= eventEndTime;
-      }
-
-      return now > eventEndTime;
+        (event.description || '').toLowerCase().includes(query)
+      );
     })
     .sort((a, b) => {
       if (sortBy === 'date') {
@@ -197,11 +125,6 @@ export default function Dashboard() {
       <Navbar user={user} />
 
       <main className="flex-1 mx-auto w-full max-w-6xl px-6 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-normal mb-2">Dashboard</h1>
-          <p className="text-muted">Manage your registered and saved events</p>
-        </div>
-
         <section className="rounded-2xl border border-white/10 bg-black/50 p-6">
           <div className="mb-5 flex flex-wrap gap-3">
             <button
@@ -226,28 +149,6 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="mb-5 flex flex-wrap gap-3">
-            {(['all', 'upcoming', 'ongoing', 'past'] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  statusFilter === status
-                    ? 'border border-neon text-neon'
-                    : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {status === 'all'
-                  ? 'All'
-                  : status === 'upcoming'
-                    ? 'Upcoming'
-                    : status === 'ongoing'
-                      ? 'Live'
-                      : 'Past'}
-              </button>
-            ))}
-          </div>
-
           <div className="mb-6 flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
@@ -268,7 +169,7 @@ export default function Dashboard() {
 
           {filteredEvents.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-black/30 p-10 text-center">
-              <p className="text-sm text-muted mb-4">{emptyStateTitle}</p>
+              <p className="mb-4 text-sm text-muted">{emptyStateTitle}</p>
               <Link
                 href="/browse"
                 className="inline-block rounded-lg bg-neon px-5 py-2 text-sm font-medium text-black transition hover:bg-neon/90"
@@ -278,52 +179,18 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {filteredEvents.map((event) => {
-                const eventDate = new Date(event.date);
-                const formattedDate = eventDate.toLocaleDateString();
-                const formattedTime = eventDate.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-
-                return (
-                  <Link
-                    key={event.id}
-                    href={`/events/${event.eventCode || event.id}`}
-                    className="group overflow-hidden rounded-xl border border-white/10 bg-black/30 transition hover:border-white/30"
-                  >
-                    <div className="relative h-36 w-full bg-black/60">
-                      {event.bannerUrl ? (
-                        <Image
-                          src={event.bannerUrl}
-                          alt={event.title}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gradient-to-br from-white/10 to-white/0" />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    </div>
-
-                    <div className="p-4">
-                      <h3 className="font-medium text-white transition group-hover:text-neon line-clamp-1">
-                        {event.title}
-                      </h3>
-                      <p className="mt-2 text-xs text-muted line-clamp-2 min-h-[2.5rem]">
-                        {event.description || `Happening at ${event.venue}`}
-                      </p>
-                      <div className="mt-3 space-y-1 text-xs text-muted">
-                        <p>{formattedDate} • {formattedTime}</p>
-                        <p>{event.venue}</p>
-                        {activeTab === 'saved' && event.registrationsCount > 0 && (
-                          <p>{event.registrationsCount} registered</p>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {filteredEvents.map((event) => (
+                <EventPreviewCard
+                  key={event.id}
+                  href={`/events/${event.eventCode || event.id}`}
+                  title={event.title}
+                  date={event.date}
+                  venue={event.venue}
+                  bannerUrl={event.bannerUrl}
+                  registrationCount={event.registrationsCount}
+                  footerLabel={activeTab === 'registered' ? 'Registered event' : 'Saved event'}
+                />
+              ))}
             </div>
           )}
         </section>

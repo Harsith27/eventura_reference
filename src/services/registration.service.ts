@@ -67,16 +67,6 @@ export async function registerForEvent(
     },
   });
 
-  // Create notification
-  await prisma.notification.create({
-    data: {
-      userId,
-      eventId,
-      type: "REGISTRATION_CONFIRMED",
-      title: "You're Registered",
-      message: `You have successfully registered for ${event.title} on ${event.date.toDateString()}`,
-    },
-  });
 
   return registration;
 }

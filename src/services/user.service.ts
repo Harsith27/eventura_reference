@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword, comparePassword, generateToken } from "@/lib/auth";
+import type { AppUser } from "@/lib/app-types";
 
 export interface UserRegisterPayload {
   firstName: string;
@@ -20,11 +21,62 @@ export interface UserLoginPayload {
   password: string;
 }
 
+interface AuthResult {
+  user: AppUser;
+  token: string;
+}
+
 export interface CreateOrganiserPayload {
   firstName: string;
   lastName: string;
   email: string;
   collegeId: string;
+}
+
+function getSuperadminCredentials() {
+  return {
+    email: process.env.SUPERADMIN_EMAIL?.trim().toLowerCase(),
+    password: process.env.SUPERADMIN_PASSWORD,
+  };
+}
+
+function buildSuperadminUser(email: string): AppUser {
+  return {
+    id: "SUPERADMIN",
+    firstName: "Super",
+    lastName: "Admin",
+    email,
+    name: "SUPERADMIN",
+    role: "SUPERADMIN",
+    status: "ACTIVE",
+    profileImage: "",
+    collegeId: null,
+    isProfileComplete: true,
+  };
+}
+
+async function loginConfiguredSuperadmin(data: UserLoginPayload): Promise<AuthResult | null> {
+  const superadmin = getSuperadminCredentials();
+  const email = data.email.trim().toLowerCase();
+
+  if (!superadmin.email || !superadmin.password || email !== superadmin.email) {
+    return null;
+  }
+
+  if (data.password !== superadmin.password) {
+    throw new Error("Invalid credentials");
+  }
+
+  const user = buildSuperadminUser(data.email.trim());
+  const token = await generateToken({
+    userId: user.id,
+    email: user.email,
+    role: "SUPERADMIN",
+    status: "ACTIVE",
+    isProfileComplete: true,
+  });
+
+  return { user, token };
 }
 
 /**
@@ -167,6 +219,11 @@ export async function registerUser(data: UserRegisterPayload) {
  * Login user with email and password
  */
 export async function loginUser(data: UserLoginPayload) {
+  const superadminLogin = await loginConfiguredSuperadmin(data);
+  if (superadminLogin) {
+    return superadminLogin;
+  }
+
   // Find user by email
   const user = await prisma.user.findUnique({
     where: { email: data.email },
@@ -294,47 +351,13 @@ export async function getUserById(userId: string) {
  * SUPERADMIN login (hardcoded credentials from .env)
  */
 export async function loginSuperadmin(
-  username: string,
+  email: string,
   password: string
-): Promise<{
-  success: boolean;
-  message?: string;
-  data?: { id: string; username: string; role: string };
-}> {
-  try {
-    const superadminUsername = process.env.SUPERADMIN_USERNAME;
-    const superadminPassword = process.env.SUPERADMIN_PASSWORD;
-
-    if (!superadminUsername || !superadminPassword) {
-      throw new Error("SUPERADMIN credentials not configured");
-    }
-
-    // Direct credential check (not from DB)
-    if (username !== superadminUsername || password !== superadminPassword) {
-      throw new Error("Invalid SUPERADMIN credentials");
-    }
-
-    // Generate JWT token for SUPERADMIN
-    const token = await generateToken({
-      userId: "SUPERADMIN",
-      email: process.env.SUPERADMIN_EMAIL || "myprojecthub27@gmail.com",
-      role: "SUPERADMIN",
-      status: "ACTIVE",
-      isProfileComplete: true,
-    });
-
-    return {
-      success: true,
-      data: {
-        id: "SUPERADMIN",
-        username: superadminUsername,
-        role: "SUPERADMIN",
-      },
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.message || "SUPERADMIN login failed",
-    };
+): Promise<AuthResult> {
+  const result = await loginConfiguredSuperadmin({ email, password });
+  if (!result) {
+    throw new Error("Invalid credentials");
   }
+
+  return result;
 }

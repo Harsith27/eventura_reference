@@ -128,7 +128,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Navigation */}
       <header className="fixed bottom-4 left-0 right-0 z-40">
         <div className="mx-auto w-full max-w-7xl px-6">
@@ -152,7 +152,7 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-6 py-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">Analytics Dashboard</h1>
           <div className="flex gap-3">
@@ -225,44 +225,6 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Users by Status */}
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Users by Status</h2>
-                <div className="space-y-3">
-                  {analytics.usersByStatus.map((item: any) => (
-                    <div key={item.status} className="flex justify-between items-center">
-                      <span className="text-gray-400">{item.status}</span>
-                      <span className="font-semibold">{item._count.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Events by Status */}
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Events by Status</h2>
-                <div className="space-y-3">
-                  {analytics.eventsByStatus.map((item: any) => (
-                    <div key={item.status} className="flex justify-between items-center">
-                      <span className="text-gray-400">{item.status || 'N/A'}</span>
-                      <span className="font-semibold">{item._count.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Registrations by Status */}
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Registrations by Status</h2>
-                <div className="space-y-3">
-                  {analytics.registrationsByStatus.map((item: any) => (
-                    <div key={item.status} className="flex justify-between items-center">
-                      <span className="text-gray-400">{item.status}</span>
-                      <span className="font-semibold">{item._count.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Top Events */}
@@ -304,7 +266,6 @@ export default function AnalyticsPage() {
                       <th className="text-left py-3 px-4">User</th>
                       <th className="text-left py-3 px-4">Email</th>
                       <th className="text-left py-3 px-4">Event</th>
-                      <th className="text-left py-3 px-4">Status</th>
                       <th className="text-left py-3 px-4">Registered At</th>
                     </tr>
                   </thead>
@@ -314,19 +275,6 @@ export default function AnalyticsPage() {
                         <td className="py-3 px-4">{reg.userName}</td>
                         <td className="py-3 px-4 text-gray-400">{reg.userEmail}</td>
                         <td className="py-3 px-4">{reg.eventTitle}</td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2 py-1 rounded text-xs font-semibold ${
-                              reg.status === 'CONFIRMED'
-                                ? 'bg-green-500/20 text-green-400'
-                                : reg.status === 'PENDING'
-                                ? 'bg-yellow-500/20 text-yellow-400'
-                                : 'bg-red-500/20 text-red-400'
-                            }`}
-                          >
-                            {reg.status}
-                          </span>
-                        </td>
                         <td className="py-3 px-4 text-gray-400">
                           {new Date(reg.registeredAt).toLocaleString()}
                         </td>

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import Footer from '@/components/Footer';
+import PublicAuthLayout from '@/components/auth/PublicAuthLayout';
+import AuthCard from '@/components/auth/AuthCard';
+import AuthField from '@/components/auth/AuthField';
 import {
   Select,
   SelectContent,
@@ -44,6 +45,9 @@ export default function RegisterPage() {
       [name]: value,
     });
   };
+
+  const roleLinkClass = (role: 'USER' | 'ORGANIZER') =>
+    formData.role === role ? 'text-white' : 'text-muted hover:text-white';
 
   const handleRoleSelect = (role: 'USER' | 'ORGANIZER') => {
     setError('');
@@ -188,72 +192,33 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ink text-white flex flex-col">
-      {/* Header */}
-      <header className="sticky top-4 z-40 relative">
-        <div className="pointer-events-none absolute -top-8 left-1/2 h-16 w-[120vw] -translate-x-1/2 bg-transparent blur-xl" />
-        <div className="mx-auto w-full max-w-7xl px-6">
-          <div className="relative flex items-center justify-between rounded-2xl border border-white/10 bg-black/70 px-7 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.18),inset_1px_0_0_rgba(255,255,255,0.12),inset_-1px_0_0_rgba(255,255,255,0.12)] backdrop-blur">
-            <Link href="/" className="flex items-center hover:opacity-80 transition" aria-label="Home">
-              <Image
-                src="/branding/logo_dark_no_bg..svg"
-                alt="Eventura"
-                width={144}
-                height={36}
-                className="h-9 w-auto"
-                priority
-              />
-            </Link>
-            <div className="absolute left-1/2 hidden -translate-x-1/2 items-center md:flex">
-              <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect('USER')}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    formData.role === 'USER'
-                      ? 'bg-white/15 text-white shadow-[0_6px_18px_rgba(255,255,255,0.08)]'
-                      : 'text-muted hover:text-white'
-                  }`}
-                >
-                  Student
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleRoleSelect('ORGANIZER')}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                    formData.role === 'ORGANIZER'
-                      ? 'bg-white/15 text-white shadow-[0_6px_18px_rgba(255,255,255,0.08)]'
-                      : 'text-muted hover:text-white'
-                  }`}
-                >
-                  Organiser
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="rounded-full border-thin px-4 py-2 text-sm text-muted transition hover:text-white hover:shadow-[0_0_0_1px_rgba(255,255,255,0.9)]"
-              >
-                Log in
-              </Link>
-            </div>
-          </div>
+    <PublicAuthLayout
+      headerActions={[{ href: '/login', label: 'Log in' }]}
+      centerContent={
+        <div className="items-center gap-5 text-sm md:flex">
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('USER')}
+            className={`transition ${roleLinkClass('USER')}`}
+          >
+            Student
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('ORGANIZER')}
+            className={`transition ${roleLinkClass('ORGANIZER')}`}
+          >
+            Organiser
+          </button>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-md">
-          {/* Register Card */}
-          <div className="rounded-3xl border border-white/10 p-7 bg-black">
+      }
+      mainClassName="flex-1 flex items-center justify-center px-6 py-10"
+    >
+      <AuthCard className="p-7">
             <div className="text-center mb-6">
               <h1 className="mt-3 text-3xl font-normal bg-gradient-to-r from-pink-400 via-red-500 to-orange-400 bg-clip-text text-transparent">
                 Create your account
               </h1>
-              <p className="mt-3 text-sm text-muted">
-                Start discovering and registering for events
-              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -263,114 +228,77 @@ export default function RegisterPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-center md:hidden">
-                <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-                  <button
-                    type="button"
-                    onClick={() => handleRoleSelect('USER')}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      formData.role === 'USER'
-                        ? 'bg-white/15 text-white shadow-[0_6px_18px_rgba(255,255,255,0.08)]'
-                        : 'text-muted hover:text-white'
-                    }`}
-                  >
-                    Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRoleSelect('ORGANIZER')}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                      formData.role === 'ORGANIZER'
-                        ? 'bg-white/15 text-white shadow-[0_6px_18px_rgba(255,255,255,0.08)]'
-                        : 'text-muted hover:text-white'
-                    }`}
-                  >
-                    Organiser
-                  </button>
-                </div>
+              <div className="flex items-center justify-center gap-5 text-sm md:hidden">
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect('USER')}
+                  className={`transition ${roleLinkClass('USER')}`}
+                >
+                  Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRoleSelect('ORGANIZER')}
+                  className={`transition ${roleLinkClass('ORGANIZER')}`}
+                >
+                  Organiser
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm text-white mb-2">
-                    First name
-                  </label>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    placeholder="John"
-                    className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="lastName" className="block text-sm text-white mb-2">
-                    Last name
-                  </label>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    placeholder="Doe"
-                    className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm text-white mb-2">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
+                <AuthField
+                  id="firstName"
+                  name="firstName"
+                  label="First name"
+                  value={formData.firstName}
                   onChange={handleChange}
-                  placeholder="your-email@college.edu"
-                  className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
+                  placeholder="Harsith"
+                  required
+                />
+
+                <AuthField
+                  id="lastName"
+                  name="lastName"
+                  label="Last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Bheesetti"
                   required
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm text-white mb-2">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
-                  required
-                />
-              </div>
+              <AuthField
+                id="email"
+                name="email"
+                label="Email address"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your college mail id"
+                required
+              />
 
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm text-white mb-2">
-                  Confirm password
-                </label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
-                  required
-                />
-              </div>
+              <AuthField
+                id="password"
+                name="password"
+                label="Password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+
+              <AuthField
+                id="confirmPassword"
+                name="confirmPassword"
+                label="Confirm password"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
 
               {formData.role === 'USER' && (
                 <>
@@ -416,7 +344,7 @@ export default function RegisterPage() {
                         value={formData.collegeName}
                         onChange={handleChange}
                         placeholder="Your college name"
-                        className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
+                        className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-white placeholder:text-soft focus:border-neon focus:outline-none transition"
                         required
                       />
                     </div>
@@ -466,7 +394,7 @@ export default function RegisterPage() {
                       value={formData.contactNumber}
                       onChange={handleChange}
                       placeholder="+91 9876543210"
-                      className="w-full px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
+                        className="w-full rounded-2xl border border-white/10 bg-black px-4 py-3 text-white placeholder:text-soft focus:border-neon focus:outline-none transition"
                       required
                     />
                   </div>
@@ -481,7 +409,7 @@ export default function RegisterPage() {
                       value={formData.reason}
                       onChange={handleChange}
                       placeholder="Share the events you plan to host"
-                      className="w-full min-h-[110px] px-4 py-3 rounded-2xl bg-black/40 border-thin text-white placeholder:text-soft focus:outline-none focus:border-neon transition"
+                      className="w-full min-h-[110px] rounded-2xl border border-white/10 bg-black px-4 py-3 text-white placeholder:text-soft focus:border-neon focus:outline-none transition"
                       required
                     />
                   </div>
@@ -503,16 +431,7 @@ export default function RegisterPage() {
                 Sign in
               </Link>
             </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-4 text-center text-xs text-soft">
-            Admin-approved publishing · QR attendance · Secure access
-          </div>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
+      </AuthCard>
+    </PublicAuthLayout>
   );
 }

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import type { AppUser, CollegeOption } from '@/lib/app-types';
+import type { CustomField } from '@/lib/event-types';
 import {
   Select,
   SelectContent,
@@ -11,30 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  status?: string;
-  collegeId?: string | null;
-}
-
-interface College {
-  id: string;
-  name: string;
-}
-
-interface CustomField {
-  id: string;
-  label: string;
-  type: 'text' | 'email' | 'phone' | 'number' | 'dropdown' | 'checkbox' | 'date' | 'textarea';
-  required: boolean;
-  placeholder?: string;
-  options?: string[];
-}
 
 const DEFAULT_REGISTRATION_FIELDS: CustomField[] = [
   {
@@ -101,7 +79,7 @@ function CreateEventForm() {
   const searchParams = useSearchParams();
   const editParam = searchParams.get('edit');
   const errorRef = useRef<HTMLDivElement | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [posterImage, setPosterImage] = useState<string | null>(null);
   const [posterFileName, setPosterFileName] = useState('');
@@ -110,7 +88,7 @@ function CreateEventForm() {
   const [isSingleDayEvent, setIsSingleDayEvent] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [colleges, setColleges] = useState<College[]>([]);
+  const [colleges, setColleges] = useState<CollegeOption[]>([]);
   const [collegesLoading, setCollegesLoading] = useState(false);
   const [visibilityModalOpen, setVisibilityModalOpen] = useState(false);
   const [collegeSearch, setCollegeSearch] = useState('');

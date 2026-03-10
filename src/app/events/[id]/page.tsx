@@ -3,65 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-
-interface Event {
-  id: string;
-  eventCode?: string;
-  title: string;
-  description: string;
-  tags?: string;
-  date: string;
-  venue: string;
-  capacity: number;
-  bannerUrl?: string;
-  isLive?: boolean;
-  isPaid?: boolean;
-  ticketPrice?: number;
-  customRegistrationFields?: string;
-  organiser: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    profile?: {
-      profilePhoto?: string;
-    };
-  };
-  _count: {
-    registrations: number;
-  };
-}
-
-interface User {
-  id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-}
-
-interface CollegeOption {
-  id: string;
-  name: string;
-}
-
-interface RegistrationField {
-  id: string;
-  label: string;
-  type: 'text' | 'email' | 'phone' | 'number' | 'dropdown' | 'checkbox' | 'date' | 'textarea';
-  required: boolean;
-  placeholder?: string;
-  options?: string[];
-}
-
-type FormValue = string | boolean;
+import type { AppUser, CollegeOption } from '@/lib/app-types';
+import type { EventDetails, FormValue, RegistrationField } from '@/lib/event-types';
 
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [event, setEvent] = useState<EventDetails | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);

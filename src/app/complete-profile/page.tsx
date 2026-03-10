@@ -363,8 +363,7 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-black text-white overflow-visible">
+      <div className="min-h-screen bg-black text-white overflow-visible flex flex-col">
         {/* Header */}
         <header className="sticky top-4 z-40">
         <div className="mx-auto w-full max-w-7xl px-6">
@@ -384,7 +383,7 @@ export default function CompleteProfilePage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center px-6 py-10">
+      <main className="flex flex-1 items-center justify-center px-6 py-10">
         <div className="w-full max-w-2xl">
           {/* Profile Completion Card */}
           <div className="glass card-glow rounded-3xl border-strong p-7">
@@ -760,7 +759,7 @@ export default function CompleteProfilePage() {
             </form>
           </div>
         </div>
-      </div>
+      </main>
     </div>
 
     {/* Camera Modal - Using Portal to render outside DOM hierarchy */}
@@ -892,7 +891,6 @@ export default function CompleteProfilePage() {
       document.body
     )}
     
-    <Footer />
-    </>
+        <Footer />
   );
 }

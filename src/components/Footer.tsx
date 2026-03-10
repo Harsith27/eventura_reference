@@ -15,14 +15,10 @@ export default function Footer() {
               className="h-8 w-auto"
             />
           </Link>
-          <div className="flex items-center gap-4 text-xs text-white">
-            <span>© 2026 Eventura</span>
-          </div>
           <div className="flex items-center gap-3 text-xs text-white">
-            <a className="hover:text-white transition" href="https://x.com" target="_blank" rel="noreferrer">X</a>
-            <a className="hover:text-white transition" href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
-            <a className="hover:text-white transition" href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
-            <a className="hover:text-white transition" href="https://youtube.com" target="_blank" rel="noreferrer">YouTube</a>
+            <a className="text-white/80 transition hover:text-white" href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+            <a className="text-white/80 transition hover:text-white" href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a className="text-white/80 transition hover:text-white" href="https://youtube.com" target="_blank" rel="noreferrer">YouTube</a>
           </div>
         </div>
       </div>

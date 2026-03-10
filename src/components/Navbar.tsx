@@ -4,20 +4,23 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
+import type { AppUser } from '@/lib/app-types';
 
 interface NavbarProps {
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-    status?: string;
-    profileImage?: string | null;
-  };
+  user: AppUser;
+  minimalHome?: boolean;
 }
 
-export default function Navbar({ user }: NavbarProps) {
+function UserAvatarFallback() {
+  return (
+    <svg className="h-5 w-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.5 20.25a7.5 7.5 0 0115 0" />
+    </svg>
+  );
+}
+
+export default function Navbar({ user, minimalHome = false }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -28,13 +31,36 @@ export default function Navbar({ user }: NavbarProps) {
       '/dashboard',
       '/user/dashboard',
       '/organizer/dashboard',
-      '/admin/dashboard',
-      '/superadmin/dashboard',
     ],
+    '/admin/dashboard': ['/admin', '/admin/dashboard'],
+    '/superadmin/dashboard': ['/superadmin', '/superadmin/dashboard'],
     '/events/create': ['/events/create'],
     '/organizer/my-events': ['/organizer/my-events'],
+    '/organizer/scan-attendance': ['/organizer/scan-attendance'],
+    '/superadmin/analytics': ['/superadmin/analytics'],
     '/browse': ['/browse'],
   };
+
+  const dashboardHref =
+    user.role === 'SUPERADMIN'
+      ? '/superadmin/dashboard'
+      : user.role === 'ADMIN'
+        ? '/admin/dashboard'
+        : '/dashboard';
+
+  const primaryNavItems = [
+    { href: dashboardHref, label: 'Dashboard', show: true },
+    {
+      href: '/events/create',
+      label: 'Create Event',
+      show: (user.role === 'ORGANIZER' && user.status === 'ACTIVE') || user.role === 'ADMIN' || user.role === 'SUPERADMIN',
+    },
+    { href: '/organizer/my-events', label: 'My Events', show: user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' },
+    { href: '/organizer/scan-attendance', label: 'Scan QR', show: user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' },
+    { href: '/superadmin/analytics', label: 'Analytics', show: user.role === 'SUPERADMIN' },
+  ];
+  const canViewProfile = user.role !== 'ADMIN' && user.role !== 'SUPERADMIN';
+  const canExploreEvents = user.role !== 'ADMIN' && user.role !== 'SUPERADMIN';
 
   const isActive = (href: string) => {
     const aliases = navAliases[href] ?? [href];
@@ -43,7 +69,7 @@ export default function Navbar({ user }: NavbarProps) {
     );
   };
   const getNavLinkClass = (href: string) => {
-    const baseClass = "text-base font-medium transition";
+    const baseClass = "text-sm font-medium transition";
     return isActive(href) 
       ? `${baseClass} text-neon font-semibold` 
       : `${baseClass} text-muted hover:text-white`;
@@ -81,10 +107,6 @@ export default function Navbar({ user }: NavbarProps) {
     }
   };
 
-  const canCreateEvent = (user.role === 'ORGANIZER' && user.status === 'ACTIVE') || 
-                         user.role === 'ADMIN' || 
-                         user.role === 'SUPERADMIN';
-
   return (
     <header className="sticky top-4 z-40">
       <div className="mx-auto w-full max-w-7xl px-6">
@@ -102,56 +124,38 @@ export default function Navbar({ user }: NavbarProps) {
               />
             </Link>
 
-            {/* Left Nav */}
-            <nav className="hidden items-center gap-6 md:flex">
-            <Link
-              href="/dashboard"
-              className={getNavLinkClass("/dashboard")}
-            >
-              Dashboard
-            </Link>
-            {canCreateEvent && (
-              <Link
-                href="/events/create"
-                className={getNavLinkClass("/events/create")}
-              >
-                Create Event
-              </Link>
+            {!minimalHome && (
+              <nav className="hidden items-center gap-5 md:flex">
+                {primaryNavItems.filter((item) => item.show).map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={getNavLinkClass(item.href)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
             )}
-            {(user.role === 'ORGANIZER' || user.role === 'SUPER_ADMIN') && (
-              <Link
-                href="/organizer/my-events"
-                className={getNavLinkClass('/organizer/my-events')}
-              >
-                My Events
-              </Link>
-            )}
-            {(user.role === 'ORGANIZER' || user.role === 'SUPER_ADMIN') && (
-              <Link
-                href="/organizer/scan-attendance"
-                className={getNavLinkClass('/organizer/scan-attendance')}
-              >
-                Scan QR
-              </Link>
-            )}
-            </nav>
           </div>
 
           {/* Right Side Nav */}
           <div className="flex items-center gap-6">
-            <Link
-              href="/browse"
-              className={`hidden md:inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
-                isActive('/browse')
-                  ? 'border-white/50 bg-white/10'
-                  : 'border-white/20 hover:border-white/40'
-              }`}
-            >
-              <span className="bg-gradient-to-r from-pink-400 via-red-500 to-orange-400 bg-clip-text text-transparent">Explore Events</span>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H9M17 7v8" />
-              </svg>
-            </Link>
+            {!minimalHome && canExploreEvents && (
+              <Link
+                href="/browse"
+                className={`hidden md:inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
+                  isActive('/browse')
+                    ? 'border-white/50 bg-white/10'
+                    : 'border-white/20 hover:border-white/40'
+                }`}
+              >
+                <span className="bg-gradient-to-r from-pink-400 via-red-500 to-orange-400 bg-clip-text text-transparent">Explore Events</span>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H9M17 7v8" />
+                </svg>
+              </Link>
+            )}
             {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
@@ -167,7 +171,7 @@ export default function Navbar({ user }: NavbarProps) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  user.firstName.charAt(0).toUpperCase()
+                  <UserAvatarFallback />
                 )}
               </button>
 
@@ -186,7 +190,7 @@ export default function Navbar({ user }: NavbarProps) {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        user.firstName.charAt(0).toUpperCase()
+                        <UserAvatarFallback />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -199,13 +203,15 @@ export default function Navbar({ user }: NavbarProps) {
 
                   {/* Menu Items */}
                   <div className="p-2">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white hover:bg-white/10 transition"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      View Profile
-                    </Link>
+                    {canViewProfile && (
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white hover:bg-white/10 transition"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        View Profile
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setDropdownOpen(false);

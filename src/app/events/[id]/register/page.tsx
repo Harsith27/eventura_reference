@@ -4,42 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  collegeId?: string | null;
-  name?: string;
-}
-
-interface ProfileInfo {
-  whatsapp?: string;
-  gender?: string;
-  dateOfBirth?: string;
-  college?: string;
-  year?: number;
-  branch?: string;
-  customBranch?: string;
-  collegeId?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-}
-
-interface CustomField {
-  id: string;
-  label: string;
-  type: 'text' | 'email' | 'phone' | 'number' | 'dropdown' | 'checkbox' | 'date' | 'textarea';
-  required: boolean;
-  placeholder?: string;
-  options?: string[];
-}
+import type { AppUser, ProfileInfo } from '@/lib/app-types';
+import type { CustomField } from '@/lib/event-types';
 
 const DEFAULT_REGISTRATION_FIELDS: CustomField[] = [
   {
@@ -151,7 +117,7 @@ interface Event {
 export default function RegisterForEventPage() {
   const router = useRouter();
   const params = useParams();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [event, setEvent] = useState<Event | null>(null);
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);

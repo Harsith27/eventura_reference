@@ -124,22 +124,6 @@ export default function EventAnalyticsPage() {
     ],
   };
 
-  const statusData = {
-    labels: ['Pending', 'Confirmed', 'Attended', 'Cancelled'],
-    datasets: [
-      {
-        data: [
-          analytics.statusBreakdown.PENDING,
-          analytics.statusBreakdown.CONFIRMED,
-          analytics.statusBreakdown.ATTENDED,
-          analytics.statusBreakdown.CANCELLED,
-        ],
-        backgroundColor: ['#facc15', '#3b82f6', '#22c55e', '#ef4444'],
-        borderWidth: 0,
-      },
-    ],
-  };
-
   const collegeData = {
     labels: analytics.collegeDistribution.slice(0, 10).map((c) => c.name),
     datasets: [
@@ -279,14 +263,6 @@ export default function EventAnalyticsPage() {
             </div>
           </div>
 
-          {/* Status Breakdown */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Status Breakdown</h2>
-            <div className="h-64">
-              <Doughnut data={statusData} options={doughnutOptions} />
-            </div>
-          </div>
-
           {/* College Distribution */}
           <div className="bg-white/5 border border-white/10 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Top Colleges</h2>
@@ -314,7 +290,6 @@ export default function EventAnalyticsPage() {
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Name</th>
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Email</th>
                   <th className="text-left py-3 px-4 text-sm text-gray-400">College</th>
-                  <th className="text-left py-3 px-4 text-sm text-gray-400">Status</th>
                   <th className="text-left py-3 px-4 text-sm text-gray-400">Registered</th>
                 </tr>
               </thead>
@@ -324,21 +299,6 @@ export default function EventAnalyticsPage() {
                     <td className="py-3 px-4">{reg.userName}</td>
                     <td className="py-3 px-4 text-sm text-gray-400">{reg.userEmail}</td>
                     <td className="py-3 px-4 text-sm text-gray-400">{reg.college}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          reg.status === 'ATTENDED'
-                            ? 'bg-green-500/20 text-green-400'
-                            : reg.status === 'CONFIRMED'
-                            ? 'bg-blue-500/20 text-blue-400'
-                            : reg.status === 'PENDING'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-red-500/20 text-red-400'
-                        }`}
-                      >
-                        {reg.status}
-                      </span>
-                    </td>
                     <td className="py-3 px-4 text-sm text-gray-400">
                       {new Date(reg.createdAt).toLocaleDateString()}
                     </td>

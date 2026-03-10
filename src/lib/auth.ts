@@ -24,6 +24,8 @@ export interface JWTPayload extends JoseJWTPayload {
 export interface AuthUser {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   name: string;
   role: "SUPERADMIN" | "ADMIN" | "ORGANIZER" | "USER";
   status: "ACTIVE" | "PENDING" | "REJECTED" | "SUSPENDED";
@@ -89,6 +91,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       return {
         id: "SUPERADMIN",
         email: payload.email,
+        firstName: "Super",
+        lastName: "Admin",
         name: "SUPERADMIN",
         role: "SUPERADMIN" as const,
         status: "ACTIVE" as const,

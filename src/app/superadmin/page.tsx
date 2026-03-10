@@ -5,27 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Footer from '@/components/Footer';
-
-interface AdminRequest {
-  id: string;
-  collegeName: string;
-  firstName: string;
-  email: string;
-  status: string;
-  createdAt: string;
-}
-
-interface AdminUser {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  isActive: boolean;
-  createdAt: string;
-  college?: {
-    name: string;
-  };
-}
+import type { AdminRequest, AdminUser } from '@/lib/admin-types';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -158,7 +138,7 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-ink text-white">
+    <div className="min-h-screen bg-ink text-white flex flex-col">
       {/* Header */}
       <header className="sticky top-4 z-40">
         <div className="mx-auto w-full max-w-7xl px-6">
@@ -187,15 +167,7 @@ export default function SuperAdminDashboard() {
       </header>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="mb-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft">System Control</p>
-          <h1 className="mt-3 text-3xl font-normal">SUPERADMIN Dashboard</h1>
-          <p className="mt-3 text-sm text-muted">
-            Manage admin access requests from colleges
-          </p>
-        </div>
-
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12">
         {/* Message Alert */}
         {message && (
           <div
@@ -209,41 +181,25 @@ export default function SuperAdminDashboard() {
           </div>
         )}
 
-        {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 mb-8">
-          <div className="glass rounded-2xl border-thin p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-soft">Pending Requests</p>
-            <p className="mt-2 text-3xl font-normal">{requests.length}</p>
-          </div>
-          <div className="glass rounded-2xl border-thin p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-soft">Total Admin Users</p>
-            <p className="mt-2 text-3xl font-normal text-neon">{adminUsers.length}</p>
-          </div>
-          <div className="glass rounded-2xl border-thin p-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-soft">Active Admins</p>
-            <p className="mt-2 text-3xl font-normal">{adminUsers.filter(a => a.isActive).length}</p>
-          </div>
-        </div>
-
         {/* Tabs */}
         <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-3">
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('requests')}
-              className={`pb-3 px-4 text-sm font-medium transition ${
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                 activeTab === 'requests'
-                  ? 'text-neon border-b-2 border-neon'
-                  : 'text-muted hover:text-white'
+                  ? 'bg-white/10 text-white'
+                  : 'text-muted hover:bg-white/5 hover:text-white'
               }`}
             >
               Pending Requests ({requests.length})
             </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`pb-3 px-4 text-sm font-medium transition ${
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                 activeTab === 'users'
-                  ? 'text-neon border-b-2 border-neon'
-                  : 'text-muted hover:text-white'
+                  ? 'bg-white/10 text-white'
+                  : 'text-muted hover:bg-white/5 hover:text-white'
               }`}
             >
               Admin Users ({adminUsers.length})
@@ -253,7 +209,7 @@ export default function SuperAdminDashboard() {
 
         {/* Requests List */}
         {activeTab === 'requests' && (
-          <div className="glass card-glow rounded-3xl border-strong p-8">
+          <div className="rounded-3xl border-strong bg-black p-8">
             <h2 className="text-xl font-normal mb-6">Pending Admin Requests</h2>
 
             {requests.length === 0 ? (
@@ -308,7 +264,7 @@ export default function SuperAdminDashboard() {
 
         {/* Admin Users List */}
         {activeTab === 'users' && (
-          <div className="glass card-glow rounded-3xl border-strong p-8">
+          <div className="rounded-3xl border-strong bg-black p-8">
             <h2 className="text-xl font-normal mb-6">Admin Users</h2>
 
             {adminUsers.length === 0 ? (
@@ -323,7 +279,6 @@ export default function SuperAdminDashboard() {
                       <th className="text-left py-4 px-4 text-sm font-medium text-soft uppercase tracking-[0.1em]">Name</th>
                       <th className="text-left py-4 px-4 text-sm font-medium text-soft uppercase tracking-[0.1em]">Email</th>
                       <th className="text-left py-4 px-4 text-sm font-medium text-soft uppercase tracking-[0.1em]">College</th>
-                      <th className="text-left py-4 px-4 text-sm font-medium text-soft uppercase tracking-[0.1em]">Status</th>
                       <th className="text-left py-4 px-4 text-sm font-medium text-soft uppercase tracking-[0.1em]">Created</th>
                     </tr>
                   </thead>
@@ -342,15 +297,6 @@ export default function SuperAdminDashboard() {
                         <td className="py-4 px-4 text-sm text-muted">
                           {admin.college?.name || '-'}
                         </td>
-                        <td className="py-4 px-4 text-sm">
-                          <span className={`inline-block text-xs border rounded-full px-3 py-1 ${
-                            admin.isActive
-                              ? 'bg-green-500/20 text-green-400 border-green-500/50'
-                              : 'bg-red-500/20 text-red-400 border-red-500/50'
-                          }`}>
-                            {admin.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
                         <td className="py-4 px-4 text-sm text-soft">
                           {new Date(admin.createdAt).toLocaleDateString()}
                         </td>
@@ -362,7 +308,7 @@ export default function SuperAdminDashboard() {
             )}
           </div>
         )}
-      </div>
+      </main>
       
       <Footer />
     </div>

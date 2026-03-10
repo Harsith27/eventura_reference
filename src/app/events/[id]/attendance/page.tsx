@@ -319,7 +319,6 @@ export default function EventAttendancePage() {
                   <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wide text-muted">
                     <th className="px-3 py-3">Participant</th>
                     <th className="px-3 py-3">Registered</th>
-                    <th className="px-3 py-3">Status</th>
                     <th className="px-3 py-3">Action</th>
                   </tr>
                 </thead>
@@ -336,17 +335,6 @@ export default function EventAttendancePage() {
                         </td>
                         <td className="px-3 py-3 text-sm text-muted">
                           {new Date(row.createdAt).toLocaleString()}
-                        </td>
-                        <td className="px-3 py-3">
-                          {isMarked ? (
-                            <span className="rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-medium text-green-300">
-                              Attended
-                            </span>
-                          ) : (
-                            <span className="rounded-full bg-yellow-500/15 px-2.5 py-1 text-xs font-medium text-yellow-300">
-                              Pending
-                            </span>
-                          )}
                         </td>
                         <td className="px-3 py-3">
                           <button

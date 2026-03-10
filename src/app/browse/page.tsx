@@ -5,48 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  status?: string;
-}
-
-interface Event {
-  id: string;
-  eventCode?: string;
-  title: string;
-  description: string;
-  date: string;
-  venue: string;
-  capacity: number;
-  bannerUrl?: string;
-  isLive?: boolean;
-  organiser: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  _count: {
-    registrations: number;
-  };
-  customRegistrationFields?: string;
-  collegeId?: string;
-}
+import EventPreviewCard from '@/components/EventPreviewCard';
+import type { AppUser } from '@/lib/app-types';
+import type { BrowseEvent } from '@/lib/event-types';
 
 export default function BrowseEventsPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [events, setEvents] = useState<BrowseEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<BrowseEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'popularity'>('date');
   const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'public' | 'college'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'past'>('all');
 
   useEffect(() => {
     checkAuth();
@@ -94,22 +65,6 @@ export default function BrowseEventsPage() {
         event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.venue.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Status filter
-      let matchesStatus = true;
-      if (statusFilter !== 'all') {
-        const eventDate = new Date(event.date);
-        const now = new Date();
-        const eventEndTime = new Date(eventDate.getTime() + (3 * 60 * 60 * 1000)); // Assume 3-hour events
-        
-        if (statusFilter === 'upcoming') {
-          matchesStatus = eventDate > now;
-        } else if (statusFilter === 'ongoing') {
-          matchesStatus = now >= eventDate && now <= eventEndTime;
-        } else if (statusFilter === 'past') {
-          matchesStatus = now > eventEndTime;
-        }
-      }
-
       // Visibility filter
       let matchesVisibility = true;
       if (visibilityFilter !== 'all') {
@@ -130,7 +85,7 @@ export default function BrowseEventsPage() {
         }
       }
 
-      return matchesSearch && matchesStatus && matchesVisibility;
+      return matchesSearch && matchesVisibility;
     });
 
     if (sortBy === 'date') {
@@ -140,7 +95,7 @@ export default function BrowseEventsPage() {
     }
 
     setFilteredEvents(results);
-  }, [searchQuery, sortBy, statusFilter, visibilityFilter, events]);
+  }, [searchQuery, sortBy, visibilityFilter, events]);
 
   if (loading) {
     return (
@@ -209,53 +164,6 @@ export default function BrowseEventsPage() {
       <main className="flex-1 mx-auto w-full max-w-7xl px-6 py-8">
         {/* Filter Tabs and Search Row */}
         <div className="mb-8">
-          {/* Status Filter Tabs */}
-          <div className="flex gap-3 mb-4">
-            <button
-              onClick={() => setStatusFilter('all')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition ${
-                statusFilter === 'all'
-                  ? 'bg-neon text-black'
-                  : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              All Events
-            </button>
-            <button
-              onClick={() => setStatusFilter('upcoming')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition ${
-                statusFilter === 'upcoming'
-                  ? 'bg-neon text-black'
-                  : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              Upcoming
-            </button>
-            <button
-              onClick={() => setStatusFilter('ongoing')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition ${
-                statusFilter === 'ongoing'
-                  ? 'bg-neon text-black'
-                  : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-neon animate-pulse"></span>
-                Live
-              </span>
-            </button>
-            <button
-              onClick={() => setStatusFilter('past')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition ${
-                statusFilter === 'past'
-                  ? 'bg-neon text-black'
-                  : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              Past
-            </button>
-          </div>
-          
           {/* Visibility Filter Tabs */}
           <div className="flex gap-3 mb-6">
             <button
@@ -328,115 +236,21 @@ export default function BrowseEventsPage() {
         {filteredEvents.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {filteredEvents.map((event) => {
-              const eventDate = new Date(event.date);
-              const formattedDate = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-              const formattedTime = eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
               const organizerName = `${event.organiser.firstName} ${event.organiser.lastName}`.trim();
 
-              // Get visibility info
-              let visibilityText = 'Public';
-              let visibilityBgColor = 'bg-green-500/80';
-              try {
-                const customFields = event.customRegistrationFields 
-                  ? JSON.parse(event.customRegistrationFields) 
-                  : null;
-                const visibility = customFields?.visibility?.mode || 'Public';
-                const collegeCount = customFields?.visibility?.collegeNames?.length || 0;
-                
-                if (visibility === 'College') {
-                  visibilityText = 'College Only';
-                  visibilityBgColor = 'bg-blue-500/80';
-                } else if (visibility === 'Custom') {
-                  visibilityText = `${collegeCount} College${collegeCount !== 1 ? 's' : ''}`;
-                  visibilityBgColor = 'bg-purple-500/80';
-                } else {
-                  visibilityText = 'Public';
-                  visibilityBgColor = 'bg-green-500/80';
-                }
-              } catch {}
-
-              // Check event status
-              const now = new Date();
-              const eventEndTime = new Date(eventDate.getTime() + (3 * 60 * 60 * 1000));
-              const isLive = event.isLive || false; // Use database isLive field
-
               return (
-                <Link key={event.id} href={`/events/${event.eventCode}`}>
-                  <div className="group relative rounded-xl border border-white/10 overflow-hidden bg-black/30 hover:border-neon/40 transition cursor-pointer h-[160px] flex">
-                    {/* Left: Poster (50% width) */}
-                    <div className="relative w-1/2 overflow-hidden bg-gradient-to-br from-pink-500/20 to-purple-500/20">
-                      {event.bannerUrl ? (
-                        <img
-                          src={event.bannerUrl}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg className="h-12 w-12 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                      {/* Visibility Badge on Top Right of Poster */}
-                      <div className="absolute top-2 right-2">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-md backdrop-blur-sm ${visibilityBgColor} text-white`}>
-                          {visibilityText}
-                        </span>
-                      </div>
-                      {isLive && (
-                        <div className="absolute bottom-2 left-2">
-                          <span className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md backdrop-blur-sm bg-red-500/90 text-white">
-                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
-                            LIVE
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right: Content (50% width) */}
-                    <div className="w-1/2 p-4 flex flex-col justify-between">
-                      <div>
-                        {/* Title */}
-                        <h3 className="text-sm font-semibold mb-2 line-clamp-2 text-white group-hover:text-neon transition">
-                          {event.title}
-                        </h3>
-
-                        {/* Date & Time */}
-                        <div className="flex items-center gap-1.5 mb-1.5 text-xs text-muted">
-                          <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <span>{formattedDate} • {formattedTime}</span>
-                        </div>
-
-                        {/* Location */}
-                        <div className="flex items-center gap-1.5 mb-2 text-xs text-muted">
-                          <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span className="line-clamp-1">
-                            {event.venue.includes('<iframe') || event.venue.includes('iframe') 
-                              ? 'View map' 
-                              : event.venue}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Bottom: Organizer & Registration Count */}
-                      <div className="flex items-center justify-between gap-2 text-xs pt-2 border-t border-white/10">
-                        <span className="text-muted truncate">By {organizerName}</span>
-                        <span className="text-white/80 bg-white/10 px-2 py-1 rounded font-medium flex-shrink-0">
-                          <svg className="h-3 w-3 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          {event._count.registrations}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <EventPreviewCard
+                  key={event.id}
+                  href={`/events/${event.eventCode}`}
+                  title={event.title}
+                  date={event.date}
+                  venue={event.venue}
+                  bannerUrl={event.bannerUrl}
+                  registrationCount={event._count.registrations}
+                  organizerName={organizerName}
+                  customRegistrationFields={event.customRegistrationFields}
+                  isLive={Boolean(event.isLive)}
+                />
               );
             })}
           </div>

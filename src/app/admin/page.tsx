@@ -5,68 +5,23 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-interface AdminStats {
-  totalUsers: number;
-  totalEvents: number;
-  totalRegistrations: number;
-  totalFeedback: number;
-}
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  status?: string;
-}
-
-interface Event {
-  id: string;
-  eventCode?: string;
-  title: string;
-  status: string;
-  _count: {
-    registrations: number;
-  };
-}
-
-interface OrganizerRequest {
-  id: string;
-  organizationName: string;
-  website?: string | null;
-  contactNumber: string;
-  reason: string;
-  createdAt: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    status: string;
-  };
-}
-
-interface College {
-  id: string;
-  name: string;
-}
+import type { AppUser, CollegeOption } from '@/lib/app-types';
+import type { OrganizerRequest, AdminDashboardUser } from '@/lib/admin-types';
+import type { AdminEventSummary } from '@/lib/event-types';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [users, setUsers] = useState<AdminDashboardUser[]>([]);
+  const [events, setEvents] = useState<AdminEventSummary[]>([]);
   const [organizerRequests, setOrganizerRequests] = useState<OrganizerRequest[]>([]);
-  const [colleges, setColleges] = useState<College[]>([]);
+  const [colleges, setColleges] = useState<CollegeOption[]>([]);
   const [showCollegeModal, setShowCollegeModal] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [selectedCollegeId, setSelectedCollegeId] = useState<string>('');
   const [requestsLoading, setRequestsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'events' | 'organizers'>('overview');
+  const [activeTab, setActiveTab] = useState<'users' | 'events' | 'organizers'>('users');
 
   useEffect(() => {
     fetchAdminData();
@@ -96,14 +51,7 @@ export default function AdminDashboard() {
 
       setUser(currentUser);
 
-      // Fetch admin stats
-      const statsResponse = await fetch('/api/admin/stats');
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
-      }
-
-      // Fetch all users
+      // Fetch users for this admin's college
       const usersResponse = await fetch('/api/admin/users');
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
@@ -216,141 +164,109 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-ink text-white">
+    <div className="min-h-screen bg-ink text-white flex flex-col">
       {/* Header */}
       <Navbar user={user} />
 
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <div className="mb-12">
-          <h1 className="text-3xl font-normal mb-2">Admin Dashboard</h1>
-          <p className="text-muted">Manage users, events, and platform statistics</p>
-        </div>
-
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12">
         {/* Navigation Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-white/10">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`pb-3 px-4 font-medium transition ${
-              activeTab === 'overview'
-                ? 'border-b-2 border-neon text-neon'
-                : 'text-muted hover:text-white'
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`pb-3 px-4 font-medium transition ${
-              activeTab === 'users'
-                ? 'border-b-2 border-neon text-neon'
-                : 'text-muted hover:text-white'
-            }`}
-          >
-            Users
-          </button>
-          <button
-            onClick={() => setActiveTab('events')}
-            className={`pb-3 px-4 font-medium transition ${
-              activeTab === 'events'
-                ? 'border-b-2 border-neon text-neon'
-                : 'text-muted hover:text-white'
-            }`}
-          >
-            Events
-          </button>
-          <button
-            onClick={() => setActiveTab('organizers')}
-            className={`pb-3 px-4 font-medium transition ${
-              activeTab === 'organizers'
-                ? 'border-b-2 border-neon text-neon'
-                : 'text-muted hover:text-white'
-            }`}
-          >
-            Organizer Requests
-          </button>
-        </div>
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && stats && (
-          <div className="grid gap-6 md:grid-cols-4">
-            <div className="rounded-lg border border-white/10 bg-black/40 p-6">
-              <p className="text-sm text-muted uppercase tracking-wider mb-2">Total Users</p>
-              <p className="text-3xl font-semibold">{stats.totalUsers}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/40 p-6">
-              <p className="text-sm text-muted uppercase tracking-wider mb-2">Total Events</p>
-              <p className="text-3xl font-semibold">{stats.totalEvents}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/40 p-6">
-              <p className="text-sm text-muted uppercase tracking-wider mb-2">Total Registrations</p>
-              <p className="text-3xl font-semibold">{stats.totalRegistrations}</p>
-            </div>
-            <div className="rounded-lg border border-white/10 bg-black/40 p-6">
-              <p className="text-sm text-muted uppercase tracking-wider mb-2">Total Feedback</p>
-              <p className="text-3xl font-semibold">{stats.totalFeedback}</p>
-            </div>
+        <div className="mb-8 flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeTab === 'users'
+                  ? 'bg-white/10 text-white'
+                  : 'text-muted hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              Users
+            </button>
+            <button
+              onClick={() => setActiveTab('events')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeTab === 'events'
+                  ? 'bg-white/10 text-white'
+                  : 'text-muted hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              Events
+            </button>
+            <button
+              onClick={() => setActiveTab('organizers')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeTab === 'organizers'
+                  ? 'bg-white/10 text-white'
+                  : 'text-muted hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              Organizer Requests
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40">
+          <div className="rounded-3xl border-strong bg-black p-8">
+            <h2 className="mb-6 text-xl font-normal">Users</h2>
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Role</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Joined</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Name</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Email</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Role</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Joined</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
-                  <tr key={u.id} className="border-b border-white/10 hover:bg-white/5">
-                    <td className="px-6 py-3">{u.firstName} {u.lastName}</td>
-                    <td className="px-6 py-3 text-muted">{u.email}</td>
-                    <td className="px-6 py-3">
-                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-neon/10 text-neon">
-                        {u.role}
-                      </span>
+                {users.length === 0 ? (
+                  <tr>
+                    <td className="px-4 py-8 text-sm text-muted" colSpan={4}>
+                      No users found for your college.
                     </td>
-                    <td className="px-6 py-3 text-muted text-sm">Recently added</td>
                   </tr>
-                ))}
+                ) : (
+                  users.map((u) => (
+                    <tr key={u.id} className="border-b border-white/5 transition hover:bg-white/5">
+                      <td className="px-4 py-4 text-sm font-medium">{u.firstName} {u.lastName}</td>
+                      <td className="px-4 py-4 text-sm text-muted">{u.email}</td>
+                      <td className="px-4 py-4 text-sm">
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-neon/10 text-neon">
+                          {u.role === 'USER' ? 'STUDENT' : u.role}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-soft">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
+          </div>
           </div>
         )}
 
         {/* Events Tab */}
         {activeTab === 'events' && (
-          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40">
+          <div className="rounded-3xl border-strong bg-black p-8">
+            <h2 className="mb-6 text-xl font-normal">Events</h2>
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Event Title</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Registrations</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Event Title</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Registrations</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {events.map((e) => (
-                  <tr key={e.id} className="border-b border-white/10 hover:bg-white/5">
-                    <td className="px-6 py-3">{e.title}</td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={`inline-block px-2 py-1 text-xs rounded-full ${
-                          e.status === 'PUBLISHED'
-                            ? 'bg-green-500/10 text-green-400'
-                            : 'bg-yellow-500/10 text-yellow-400'
-                        }`}
-                      >
-                        {e.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3">{e._count.registrations}</td>
-                    <td className="px-6 py-3">
+                  <tr key={e.id} className="border-b border-white/5 transition hover:bg-white/5">
+                    <td className="px-4 py-4 text-sm">{e.title}</td>
+                    <td className="px-4 py-4 text-sm">{e._count.registrations}</td>
+                    <td className="px-4 py-4">
                       <Link
                         href={`/events/${e.eventCode}`}
                         className="text-neon hover:underline text-sm"
@@ -363,44 +279,47 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+          </div>
         )}
 
         {activeTab === 'organizers' && (
-          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/40">
+          <div className="rounded-3xl border-strong bg-black p-8">
+            <h2 className="mb-6 text-xl font-normal">Organizer Requests</h2>
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Organizer</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">College</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Contact</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Reason</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Organizer</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">College</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Contact</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Reason</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-soft uppercase tracking-[0.1em]">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {organizerRequests.length === 0 ? (
                   <tr>
-                    <td className="px-6 py-6 text-sm text-muted" colSpan={5}>
+                    <td className="px-4 py-8 text-sm text-muted" colSpan={5}>
                       No pending organizer requests.
                     </td>
                   </tr>
                 ) : (
                   organizerRequests.map((request) => (
-                    <tr key={request.id} className="border-b border-white/10 hover:bg-white/5">
-                      <td className="px-6 py-3">
+                    <tr key={request.id} className="border-b border-white/5 transition hover:bg-white/5">
+                      <td className="px-4 py-4">
                         <div className="font-medium">{request.user.firstName} {request.user.lastName}</div>
                         <div className="text-xs text-muted">{request.user.email}</div>
                       </td>
-                      <td className="px-6 py-3">
+                      <td className="px-4 py-4">
                         <div className="font-medium">{request.organizationName}</div>
                       </td>
-                      <td className="px-6 py-3 text-sm text-muted">
+                      <td className="px-4 py-4 text-sm text-muted">
                         {request.contactNumber}
                       </td>
-                      <td className="px-6 py-3 text-sm text-muted">
+                      <td className="px-4 py-4 text-sm text-muted">
                         {request.reason}
                       </td>
-                      <td className="px-6 py-3">
+                      <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openCollegeModal(request.id)}
@@ -423,6 +342,7 @@ export default function AdminDashboard() {
                 )}
               </tbody>
             </table>
+          </div>
           </div>
         )}
       </main>

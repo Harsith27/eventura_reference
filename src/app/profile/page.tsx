@@ -6,30 +6,15 @@ import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import type { AppUser, ProfileInfo } from '@/lib/app-types';
 
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  status?: string;
-  collegeId?: string | null;
-}
-
-interface ProfileInfo {
-  whatsapp: string;
-  gender?: string | null;
-  dateOfBirth?: string | null;
-  college?: string | null;
-  year?: number | null;
-  branch?: string | null;
-  customBranch?: string | null;
-  collegeId?: string | null;
-  city?: string | null;
-  state?: string | null;
-  country?: string | null;
-  profilePhoto?: string | null;
+function ProfileAvatarFallback({ className = 'h-16 w-16' }: { className?: string }) {
+  return (
+    <svg className={`${className} text-white/80`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M4.5 20.25a7.5 7.5 0 0115 0" />
+    </svg>
+  );
 }
 
 const BRANCHES = [
@@ -52,7 +37,7 @@ const YEARS = [1, 2, 3, 4, 5];
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -127,7 +112,18 @@ export default function ProfilePage() {
           role: data.role,
           status: data.status,
           collegeId: data.profile?.collegeId || data.collegeId,
-        } as User;
+        } as AppUser;
+
+        if (currentUser.role === 'ADMIN') {
+          router.replace('/admin/dashboard');
+          return;
+        }
+
+        if (currentUser.role === 'SUPERADMIN') {
+          router.replace('/superadmin/dashboard');
+          return;
+        }
+
         setUser(currentUser);
         setProfile(data.profile || null);
         setImagePreview(data.profile?.profilePhoto || '');
@@ -397,8 +393,8 @@ export default function ProfilePage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-white/10 text-4xl font-semibold text-white">
-                      {formData.firstName.charAt(0).toUpperCase()}
+                    <div className="flex h-full w-full items-center justify-center bg-white/10">
+                      <ProfileAvatarFallback className="h-20 w-20" />
                     </div>
                   )}
                 </div>
@@ -661,8 +657,8 @@ export default function ProfilePage() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-white/10 text-6xl font-semibold text-white">
-                        {user.firstName.charAt(0).toUpperCase()}
+                      <div className="flex h-full w-full items-center justify-center bg-white/10">
+                        <ProfileAvatarFallback className="h-24 w-24" />
                       </div>
                     )}
                   </div>

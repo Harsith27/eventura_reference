@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginSuperadmin } from "@/services/user.service";
 import { superadminLoginSchema } from "@/lib/validations";
-import { setAuthCookie, generateToken } from "@/lib/auth";
+import { setAuthCookie } from "@/lib/auth";
 
 /**
  * POST /api/auth/superadmin/login
@@ -12,47 +12,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = superadminLoginSchema.parse(body);
 
-    const result = await loginSuperadmin(data.username, data.password);
+    const { user, token } = await loginSuperadmin(data.email, data.password);
+    await setAuthCookie(token);
 
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: result.message,
-        },
-        { status: 401 }
-      );
-    }
-
-    // Generate JWT token
-    const token = await generateToken({
-      userId: "SUPERADMIN",
-      email: process.env.SUPERADMIN_EMAIL || "myprojecthub27@gmail.com",
-      role: "SUPERADMIN",
-      status: "ACTIVE",
-      isProfileComplete: true,
-    });
-
-    // Set auth cookie
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         success: true,
         message: "SUPERADMIN login successful",
-        data: result.data,
+        data: { user },
       },
       { status: 200 }
     );
-
-    // Set cookie manually since setAuthCookie is async
-    response.cookies.set("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60,
-      path: "/",
-    });
-
-    return response;
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json(
