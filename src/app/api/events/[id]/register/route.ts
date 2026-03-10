@@ -111,9 +111,16 @@ export async function GET(
       },
     });
 
-    if (!registration || !registration.qrCode) {
+    if (!registration) {
       return NextResponse.json(
-        { success: true, message: "No active registration found", data: null },
+        { success: true, isRegistered: false, message: "No active registration found", data: null },
+        { status: 200 }
+      );
+    }
+
+    if (!registration.qrCode) {
+      return NextResponse.json(
+        { success: true, isRegistered: true, message: "Registered but QR not yet generated", data: null },
         { status: 200 }
       );
     }
@@ -124,6 +131,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: true,
+        isRegistered: true,
         data: {
           registrationId: registration.id,
           qrCode,

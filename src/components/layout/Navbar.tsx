@@ -24,6 +24,7 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const displayName = user.name || [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email;
   const avatarAlt = displayName;
@@ -54,7 +55,7 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
     {
       href: '/events/create',
       label: 'Create Event',
-      show: (user.role === 'ORGANIZER' && user.status === 'ACTIVE') || user.role === 'ADMIN' || user.role === 'SUPERADMIN',
+      show: (user.role === 'ORGANIZER' && user.status === 'ACTIVE') || user.role === 'SUPERADMIN',
     },
     { href: '/organizer/my-events', label: 'My Events', show: user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' },
     { href: '/superadmin/analytics', label: 'Analytics', show: user.role === 'SUPERADMIN' },
@@ -74,6 +75,11 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
       ? `${baseClass} text-neon font-semibold` 
       : `${baseClass} text-muted hover:text-white`;
   };
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -156,6 +162,24 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
                 </svg>
               </Link>
             )}
+            {/* Hamburger for mobile */}
+            {!minimalHome && (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden flex items-center justify-center h-9 w-9 rounded-lg border border-white/20 text-white hover:bg-white/10 transition"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {mobileMenuOpen ? (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            )}
             {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
@@ -226,6 +250,31 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
               )}
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && !minimalHome && (
+            <div className="md:hidden absolute left-0 right-0 top-full mt-2 rounded-2xl border border-white/10 bg-black/90 px-4 py-3 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur flex flex-col gap-1">
+              {primaryNavItems.filter((item) => item.show).map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${getNavLinkClass(item.href)} py-2 px-2 rounded-lg hover:bg-white/5`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              {canExploreEvents && (
+                <Link
+                  href="/browse"
+                  className={`${getNavLinkClass('/browse')} py-2 px-2 rounded-lg hover:bg-white/5`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Explore Events
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </header>

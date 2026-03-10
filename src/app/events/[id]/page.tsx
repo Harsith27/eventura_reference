@@ -221,10 +221,12 @@ export default function EventDetailsPage() {
       const response = await fetch(`/api/events/${eid}/register`);
       if (response.ok) {
         const data = await response.json();
-        const qrFromApi = data?.data?.qrCode || data?.qrCode || null;
-        if (qrFromApi) {
-          setQrCode(qrFromApi);
+        if (data?.isRegistered) {
           setIsRegistered(true);
+          const qrFromApi = data?.data?.qrCode || null;
+          if (qrFromApi) {
+            setQrCode(qrFromApi);
+          }
         }
       }
     } catch (error) {
