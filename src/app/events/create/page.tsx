@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import type { AppUser, CollegeOption } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
+import type { CollegeOption } from '@/types';
 import type { CustomField } from '@/types';
 import {
   Select,
@@ -26,8 +27,7 @@ function CreateEventForm() {
   const searchParams = useSearchParams();
   const editParam = searchParams.get('edit');
   const errorRef = useRef<HTMLDivElement | null>(null);
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [userLoading, setUserLoading] = useState(true);
+  const { user } = useAuth();
   const [posterImage, setPosterImage] = useState<string | null>(null);
   const [posterFileName, setPosterFileName] = useState('');
   const posterInputRef = useRef<HTMLInputElement | null>(null);
@@ -96,43 +96,6 @@ function CreateEventForm() {
     placeholder: '',
     options: '',
   });
-
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        // Add timeout to prevent hanging
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
-        const response = await fetch('/api/auth/me', {
-          signal: controller.signal,
-          cache: 'no-store',
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          console.log('[Create Event] Auth check failed, redirecting to login');
-          router.push('/login');
-          return;
-        }
-        const data = await response.json();
-        const currentUser = data.data?.user || data.user;
-        console.log('[Create Event] User loaded:', currentUser?.email);
-        setUser(currentUser);
-      } catch (loadError) {
-        console.error('[Create Event] Failed to load user:', loadError);
-        if (loadError instanceof Error && loadError.name === 'AbortError') {
-          console.error('[Create Event] Request timeout - API took too long to respond');
-        }
-        router.push('/login');
-      } finally {
-        setUserLoading(false);
-      }
-    };
-
-    loadUser();
-  }, [router]);
 
   useEffect(() => {
     const loadColleges = async () => {
@@ -586,7 +549,7 @@ function CreateEventForm() {
     }
   };
 
-  if (userLoading || editLoading) {
+  if (editLoading) {
     return (
       <div className="min-h-screen bg-ink flex items-center justify-center">
         <div className="text-center">

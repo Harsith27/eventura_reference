@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { useAuth } from '@/contexts/auth-context';
 import { Html5Qrcode } from 'html5-qrcode';
 
 interface CurrentUser {
@@ -33,7 +34,8 @@ export default function EventAttendancePage() {
   const params = useParams();
   const eventIdentifier = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const { user } = useAuth();
+  const currentUser = user;
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [rows, setRows] = useState<RegistrationRow[]>([]);
@@ -50,15 +52,10 @@ export default function EventAttendancePage() {
 
     try {
       setLoading(true);
-      const meRes = await fetch('/api/auth/me');
-      if (!meRes.ok) {
+      if (!currentUser) {
         router.push('/login');
         return;
       }
-
-      const meData = await meRes.json();
-      const me = meData?.data?.user || meData?.user;
-      setCurrentUser(me || null);
 
       const regsRes = await fetch(`/api/events/${eventIdentifier}/registrations?limit=500`);
       const regsPayload = await regsRes.json().catch(() => null);

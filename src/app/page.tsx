@@ -1,36 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function Home() {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        const currentUser = data.data?.user || data.user;
-        if (currentUser) {
-          setUser(currentUser);
-        }
-      }
-    } catch (error) {
-      // User not authenticated, that's fine for home page
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { user } = useAuth();
 
   const handleBrowseEvents = () => {
     if (!user) {
@@ -44,8 +21,7 @@ export default function Home() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-ink text-white">
       {/* Show authenticated navbar or public navbar */}
-      {!loading && (
-        user ? (
+      {user ? (
           <>
             <Navbar user={user} minimalHome />
             {!user.isProfileComplete && 
@@ -102,7 +78,6 @@ export default function Home() {
               </div>
             </div>
           </header>
-        )
       )}
 
       <main>

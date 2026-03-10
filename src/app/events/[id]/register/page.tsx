@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { useAuth } from '@/contexts/auth-context';
 import type { AppUser, ProfileInfo } from '@/types';
 import type { CustomField } from '@/types';
 
@@ -117,6 +118,7 @@ interface Event {
 export default function RegisterForEventPage() {
   const router = useRouter();
   const params = useParams();
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState<AppUser | null>(null);
   const [event, setEvent] = useState<Event | null>(null);
   const [profile, setProfile] = useState<ProfileInfo | null>(null);
@@ -263,27 +265,21 @@ export default function RegisterForEventPage() {
 
   const loadUser = async () => {
     try {
-      const [userResponse, profileResponse] = await Promise.all([
-        fetch('/api/auth/me'),
-        fetch('/api/profile/complete'),
-      ]);
-
-      if (!userResponse.ok) {
+      if (!authUser) {
         router.push('/login');
         return;
       }
 
-      const data = await userResponse.json();
-      const currentUserRaw = data.data?.user || data.user;
-      const fullName = (currentUserRaw?.name || '').trim();
+      const profileResponse = await fetch('/api/profile/complete');
+
+      const fullName = (authUser?.name || '').trim();
       const [firstNameFromName = '', ...rest] = fullName.split(/\s+/).filter(Boolean);
       const lastNameFromName = rest.join(' ');
-      const currentUser: User = {
-        ...currentUserRaw,
-        firstName: currentUserRaw?.firstName || firstNameFromName,
-        lastName: currentUserRaw?.lastName || lastNameFromName,
-      };
-      setUser(currentUser);
+      setUser({
+        ...authUser,
+        firstName: authUser.firstName || firstNameFromName,
+        lastName: authUser.lastName || lastNameFromName,
+      });
 
       if (profileResponse.ok) {
         const profileData = await profileResponse.json();

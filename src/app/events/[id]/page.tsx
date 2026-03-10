@@ -3,15 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import type { AppUser, CollegeOption } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
+import type { CollegeOption } from '@/types';
 import type { EventDetails, FormValue, RegistrationField } from '@/types';
 import FieldInput from './_FieldInput';
 
 export default function EventDetailsPage() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
   const [event, setEvent] = useState<EventDetails | null>(null);
-  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
@@ -80,23 +81,10 @@ export default function EventDetailsPage() {
   // Fetch data when eventCode is available
   useEffect(() => {
     if (eventCode || eventId) {
-      fetchUser();
       fetchEvent();
       fetchColleges();
     }
   }, [eventCode, eventId]);
-
-  const fetchUser = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data?.data?.user || data?.user || null);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-    }
-  };
 
   const fetchColleges = async () => {
     try {
@@ -197,14 +185,7 @@ export default function EventDetailsPage() {
         checkRegistration(eventData.id);
         checkBookmark(eventData.id);
         // Check if current user is the organizer
-        const userResponse = await fetch('/api/auth/me');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          const currentUser = userData?.data?.user || userData?.user;
-          if (currentUser?.id) {
-            setIsOrganizerOfEvent(currentUser.id === eventData.organiserId);
-          }
-        }
+        setIsOrganizerOfEvent(!!user?.id && user.id === eventData.organiserId);
       } else {
         router.push('/browse');
       }

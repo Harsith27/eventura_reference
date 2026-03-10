@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Sora, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { getCurrentUser } from "@/lib/auth";
+import { AuthProvider } from "@/contexts/auth-context";
 
 const displayFont = Space_Grotesk({
   variable: "--font-display",
@@ -25,18 +27,21 @@ export const metadata: Metadata = {
   description: "Modern event management for campuses and communities.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${displayFont.variable} ${sansFont.variable} ${monoFont.variable} antialiased`}
       >
-        {children}
+        <AuthProvider user={user}>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import type { AppUser, CollegeOption } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
+import type { CollegeOption } from '@/types';
 import type { OrganizerRequest, AdminDashboardUser } from '@/types';
 import type { AdminEventSummary } from '@/types';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
+  const { user } = useAuth();
   const [users, setUsers] = useState<AdminDashboardUser[]>([]);
   const [events, setEvents] = useState<AdminEventSummary[]>([]);
   const [organizerRequests, setOrganizerRequests] = useState<OrganizerRequest[]>([]);
@@ -35,21 +36,10 @@ export default function AdminDashboard() {
 
   const fetchAdminData = async () => {
     try {
-      const userResponse = await fetch('/api/auth/me');
-      if (!userResponse.ok || userResponse.status === 401) {
-        router.push('/login');
-        return;
-      }
-
-      const userData = await userResponse.json();
-      const currentUser = userData.data?.user || userData.user;
-
-      if (!currentUser || currentUser.role !== 'ADMIN') {
+      if (!user || user.role !== 'ADMIN') {
         router.push('/user/dashboard');
         return;
       }
-
-      setUser(currentUser);
 
       // Fetch users for this admin's college
       const usersResponse = await fetch('/api/admin/users');

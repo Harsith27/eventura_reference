@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
+import { useAuth } from '@/contexts/auth-context';
 
 interface AnalyticsData {
   summary: {
@@ -35,7 +36,7 @@ interface AnalyticsData {
 
 export default function AnalyticsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -53,18 +54,10 @@ export default function AnalyticsPage() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        const currentUser = data.data?.user || data.user;
-        if (currentUser && currentUser.role === 'SUPERADMIN') {
-          setUser(currentUser);
-          await fetchAnalytics();
-        } else {
-          router.push('/');
-        }
+      if (user && user.role === 'SUPERADMIN') {
+        await fetchAnalytics();
       } else {
-        router.push('/login');
+        router.push('/');
       }
     } catch (error) {
       console.error('Auth check error:', error);

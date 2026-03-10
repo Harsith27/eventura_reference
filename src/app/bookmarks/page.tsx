@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 
 interface Event {
   id: string;
@@ -24,26 +24,16 @@ interface Event {
 
 export default function BookmarkedEventsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
+  const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUserAndBookmarks();
+    fetchBookmarks();
   }, []);
 
-  const fetchUserAndBookmarks = async () => {
+  const fetchBookmarks = async () => {
     try {
-      // Fetch user
-      const userResponse = await fetch('/api/auth/me');
-      if (!userResponse.ok) {
-        router.push('/login');
-        return;
-      }
-      const userData = await userResponse.json();
-      const currentUser = userData.data?.user || userData.user;
-      setUser(currentUser);
-
       // Fetch bookmarks
       const response = await fetch('/api/bookmarks');
       if (response.ok) {

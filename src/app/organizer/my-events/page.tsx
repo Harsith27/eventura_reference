@@ -6,12 +6,12 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EventPreviewCard from '@/components/layout/EventPreviewCard';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 import type { OrganizedEvent } from '@/types';
 
 export default function OrganizerMyEventsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
+  const { user } = useAuth();
   const [events, setEvents] = useState<OrganizedEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,21 +20,10 @@ export default function OrganizerMyEventsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const meResponse = await fetch('/api/auth/me');
-        if (!meResponse.ok) {
-          router.push('/login');
-          return;
-        }
-
-        const meData = await meResponse.json();
-        const currentUser = meData.data?.user || meData.user;
-
-        if (currentUser.role !== 'ORGANIZER') {
+        if (!user || user.role !== 'ORGANIZER') {
           router.push('/dashboard');
           return;
         }
-
-        setUser(currentUser);
 
         const mineResponse = await fetch('/api/events/mine');
         if (mineResponse.ok) {
@@ -51,7 +40,7 @@ export default function OrganizerMyEventsPage() {
     };
 
     load();
-  }, [router]);
+  }, [user, router]);
 
   const filteredEvents = useMemo(() => {
     return [...events]

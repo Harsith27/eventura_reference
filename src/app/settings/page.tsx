@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -17,28 +16,6 @@ export default function SettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        const currentUser = data.data?.user || data.user;
-        setUser(currentUser);
-      } else {
-        router.push('/login');
-      }
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      router.push('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,12 +85,8 @@ export default function SettingsPage() {
     }
   };
 
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen bg-ink flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (

@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Footer from '@/components/layout/Footer';
+import { useAuth } from '@/contexts/auth-context';
 import type { AdminRequest, AdminUser } from '@/types';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [requests, setRequests] = useState<AdminRequest[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,21 +30,11 @@ export default function SuperAdminDashboard() {
 
   const checkAuth = async () => {
     try {
-      const userResponse = await fetch('/api/auth/me');
-      if (!userResponse.ok || userResponse.status === 401) {
-        router.push('/login');
-        return;
-      }
-
-      const userData = await userResponse.json();
-      const currentUser = userData.data?.user || userData.user;
-      
-      if (!currentUser || currentUser.role !== 'SUPERADMIN') {
+      if (!user || user.role !== 'SUPERADMIN') {
         router.push('/dashboard');
         return;
       }
 
-      setUser(currentUser);
       await Promise.all([fetchRequests(), fetchAdminUsers()]);
     } catch (error) {
       console.error('Failed to check auth:', error);

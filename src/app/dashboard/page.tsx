@@ -6,12 +6,12 @@ import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EventPreviewCard from '@/components/layout/EventPreviewCard';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 import type { BookmarkItem, EventCardItem, RegisteredItem } from '@/types';
 
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<AppUser | null>(null);
+  const { user } = useAuth();
   const [registeredEvents, setRegisteredEvents] = useState<RegisteredItem[]>([]);
   const [savedEvents, setSavedEvents] = useState<BookmarkItem[]>([]);
   const [activeTab, setActiveTab] = useState<'registered' | 'saved'>('registered');
@@ -22,16 +22,6 @@ export default function Dashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const meResponse = await fetch('/api/auth/me');
-        if (!meResponse.ok) {
-          router.push('/login');
-          return;
-        }
-
-        const meData = await meResponse.json();
-        const currentUser = meData.data?.user || meData.user;
-        setUser(currentUser);
-
         const [registrationsResponse, bookmarksResponse] = await Promise.all([
           fetch('/api/registrations'),
           fetch('/api/bookmarks'),
@@ -61,7 +51,7 @@ export default function Dashboard() {
     };
 
     load();
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (

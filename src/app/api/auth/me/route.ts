@@ -20,7 +20,14 @@ export async function GET(req: NextRequest) {
         success: true,
         data: { user },
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          // Browser caches this for 30s — avoids hitting the DB on every page navigation.
+          // stale-while-revalidate lets the page load instantly while refreshing in bg.
+          'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+        },
+      }
     );
   } catch (error) {
     console.error('[/api/auth/me] Error:', error);

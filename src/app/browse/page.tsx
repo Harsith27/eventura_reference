@@ -6,40 +6,21 @@ import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EventPreviewCard from '@/components/layout/EventPreviewCard';
-import type { AppUser } from '@/types';
+import { useAuth } from '@/contexts/auth-context';
 import type { BrowseEvent } from '@/types';
 
 export default function BrowseEventsPage() {
-  const [user, setUser] = useState<AppUser | null>(null);
+  const { user } = useAuth();
   const [events, setEvents] = useState<BrowseEvent[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<BrowseEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authLoading, setAuthLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'popularity'>('date');
   const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'public' | 'college'>('all');
 
   useEffect(() => {
-    checkAuth();
     fetchEvents();
   }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (response.ok) {
-        const data = await response.json();
-        const currentUser = data.data?.user || data.user;
-        if (currentUser) {
-          setUser(currentUser);
-        }
-      }
-    } catch (error) {
-      // User not authenticated, that's fine for browse page
-    } finally {
-      setAuthLoading(false);
-    }
-  };
 
   const fetchEvents = async () => {
     try {
@@ -108,25 +89,7 @@ export default function BrowseEventsPage() {
   return (
     <div className="min-h-screen bg-ink text-white flex flex-col">
       {/* Header */}
-      {authLoading ? (
-        <header className="sticky top-4 z-40">
-          <div className="mx-auto w-full max-w-7xl px-6">
-            <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/70 px-7 py-3.5 shadow-[0_20px_60px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.18),inset_1px_0_0_rgba(255,255,255,0.12),inset_-1px_0_0_rgba(255,255,255,0.12)] backdrop-blur">
-              <Link href="/" className="flex items-center hover:opacity-80 transition" aria-label="Home">
-                <Image
-                  src="/branding/logo_dark_no_bg..svg"
-                  alt="Eventura"
-                  width={144}
-                  height={36}
-                  className="h-9 w-auto"
-                  priority
-                />
-              </Link>
-              <div className="h-9 w-32 rounded-full bg-white/5" aria-hidden="true" />
-            </div>
-          </div>
-        </header>
-      ) : user ? (
+      {user ? (
         <Navbar user={user} />
       ) : (
         <header className="sticky top-4 z-40">
