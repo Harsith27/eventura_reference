@@ -1,0 +1,444 @@
+EVENTURA — GIT COLLABORATION PLAN
+===================================
+Team: Harsith, Naren, Shree, Kabhilesh, Vandhan
+Branches: module/auth | module/user-registration | module/create-event | module/dashboard | module/explore-events
+Target: build the full Eventura project in order, commit by commit
+
+FORMAT:
+  Person - commit - <message> - push - <branch>       → commit changes and push to module branch
+  Person - push dev - <description>                   → merge module branch into dev and push dev
+  Person - push main - <description>                  → final release merge into main
+
+RULES:
+  1. Never merge on GitHub UI — always merge locally with --no-ff
+  2. Each member works on their own module branch only
+  3. Push to your module branch first, then merge into dev
+  4. Use GIT_AUTHOR_DATE and GIT_COMMITTER_DATE for controlled timestamps
+  5. Always git pull origin dev before merging into dev
+
+===================================
+PHASE 1 — FOUNDATION + AUTH (Harsith)
+===================================
+
+1.  Harsith - commit - init: set up Next.js project with TypeScript, Tailwind CSS, and Prisma - push - auth
+2.  Harsith - commit - db: initialized prisma schema with User and College models - push - auth
+3.  Harsith - commit - db: added Event, Registration, and OrganizerRequest models - push - auth
+4.  Harsith - commit - db: finalized schema with Bookmark, Attendance, AdminRequest and all enums - push - auth
+5.  Harsith - commit - auth: added JWT generation and verification helpers in lib/auth.ts - push - auth
+6.  Harsith - commit - auth: added bcrypt password hash and compare utils - push - auth
+7.  Harsith - commit - auth: built POST /api/auth/login route with JWT cookie - push - auth
+8.  Harsith - commit - auth: built POST /api/auth/register route with USER and ORGANIZER role logic - push - auth
+9.  Harsith - commit - auth: added GET /api/auth/me and POST /api/auth/logout routes - push - auth
+10. Harsith - commit - auth: added middleware with role-based route protection and redirect rules - push - auth
+11. Harsith - commit - auth: built superadmin hardcoded login at /api/auth/superadmin/login - push - auth
+12. Harsith - commit - auth: added organizer request and admin request access API routes - push - auth
+13. Harsith - commit - auth: set up nodemailer email config and approval + request email functions - push - auth
+14. Harsith - commit - feat: built home page layout with hero section and event preview strip - push - auth
+15. Harsith - commit - feat: built login page UI and register page UI with role toggle - push - auth
+16. Harsith - commit - feat: built superadmin login page, organizer request flow UI, and navbar with auth state - push - auth
+17. Harsith - push dev - merged module/auth into dev, project foundation and full auth layer live
+
+===================================
+PHASE 2 — REGISTRATION + ATTENDANCE (Naren)
+===================================
+
+18. Naren - commit - feat: scaffolded student registration page UI with multi-field form layout - push - user-registration
+19. Naren - commit - feat: built complete-profile page with college dropdown, branch, year, and photo upload - push - user-registration
+20. Naren - commit - feat: added ProfileCameraModal component for live camera photo capture - push - user-registration
+21. Naren - commit - api: built POST /api/profile/complete route to save profile data - push - user-registration
+22. Naren - commit - api: built GET and POST /api/auth/profile routes for profile prefill - push - user-registration
+23. Naren - commit - feat: built attendance page with full registrations list and status badges - push - user-registration
+24. Naren - commit - feat: added QR code display popup and attendance mark button on event page - push - user-registration
+25. Naren - commit - api: built POST /api/events/[id]/attendance/mark and GET /api/events/[id]/verify-attendance routes - push - user-registration
+26. Naren - commit - api: built GET /api/registrations route to fetch student registered events - push - user-registration
+27. Naren - commit - feat: wired registration success email trigger in registration service after confirmed registration - push - user-registration
+28. Naren - push dev - merged module/user-registration into dev, registration and attendance flow complete
+
+===================================
+PHASE 3 — CREATE EVENT + ORGANIZER TOOLS (Shree)
+===================================
+
+29. Shree - commit - feat: scaffolded create event page with three-step section layout and stepper UI - push - create-event
+30. Shree - commit - feat: built event info section with poster upload, title, description, date and time fields - push - create-event
+31. Shree - commit - feat: added venue, capacity, visibility selector, tags and paid event toggle - push - create-event
+32. Shree - commit - api: built POST /api/events route for new event creation with full payload - push - create-event
+33. Shree - commit - feat: added registration mode section with website vs google form toggle - push - create-event
+34. Shree - commit - feat: built custom registration fields builder with add, remove, type and required controls - push - create-event
+35. Shree - commit - feat: built edit event flow with full prefill from existing event data via edit param - push - create-event
+36. Shree - commit - api: built PUT /api/events/[id] for event update and DELETE for event removal - push - create-event
+37. Shree - commit - feat: built organizer my-events page with search, sort, and event card list - push - create-event
+38. Shree - commit - api: built POST /api/events/[id]/live to toggle event live state and GET /api/events/mine - push - create-event
+39. Shree - push dev - merged module/create-event into dev, full organizer event create and edit flow live
+
+===================================
+PHASE 4 — DASHBOARDS + ADMIN CONTROLS (Kabhilesh)
+===================================
+
+40. Kabhilesh - commit - feat: scaffolded student dashboard with registered events list and quick stats - push - dashboard
+41. Kabhilesh - commit - feat: built organizer dashboard with my events summary and create event shortcut - push - dashboard
+42. Kabhilesh - commit - feat: scaffolded admin dashboard with organizer request list and approve actions - push - dashboard
+43. Kabhilesh - commit - feat: built superadmin dashboard with admin request table and approval controls - push - dashboard
+44. Kabhilesh - commit - api: built GET /api/admin/requests route and POST approve/reject organizer request - push - dashboard
+45. Kabhilesh - commit - api: built GET /api/admin/users and GET /api/admin/organisers routes for admin views - push - dashboard
+46. Kabhilesh - commit - api: built GET /api/admin/stats for total counts of users, events, requests, colleges - push - dashboard
+47. Kabhilesh - commit - feat: built contact-admin page, organizer status page, and waiting-for-approval page - push - dashboard
+48. Kabhilesh - commit - feat: built request-rejected page with reason display and re-apply option - push - dashboard
+49. Kabhilesh - commit - feat: built admin organizer management page with approve, reject, and status toggle - push - dashboard
+50. Kabhilesh - push dev - merged module/dashboard into dev, all dashboard and admin control pages live
+
+===================================
+PHASE 5 — BROWSE, PROFILE + SETTINGS (Vandhan)
+===================================
+
+51. Vandhan - commit - feat: built browse events page with event card grid layout - push - explore-events
+52. Vandhan - commit - feat: added search bar, filter by college, and sort by date and popularity to browse page - push - explore-events
+53. Vandhan - commit - feat: built EventPreviewCard component with banner, title, date, venue and registration count - push - explore-events
+54. Vandhan - commit - feat: built full event detail page with description, organizer info, tags and register CTA - push - explore-events
+55. Vandhan - commit - api: built GET /api/events with filters and GET /api/events/[id] route with registrations count - push - explore-events
+56. Vandhan - commit - feat: built profile page with view mode and edit mode for personal and academic info - push - explore-events
+57. Vandhan - commit - feat: built bookmarks page with saved events list and unsave functionality - push - explore-events
+58. Vandhan - commit - api: built GET and POST /api/bookmarks and POST /api/events/[id]/bookmark toggle route - push - explore-events
+59. Vandhan - commit - feat: built settings page with password change form and account deletion modal - push - explore-events
+60. Vandhan - commit - api: built POST /api/auth/change-password and DELETE /api/auth/delete-account routes - push - explore-events
+61. Vandhan - push dev - merged module/explore-events into dev, browse, profile, bookmarks and settings complete
+
+===================================
+FINAL RELEASE
+===================================
+
+62. Harsith - push main - merged dev into main, full Eventura project released
+
+===================================
+AFTER ALL COMMITS ARE DONE — HOW TO ACTUALLY EXECUTE THIS
+===================================
+
+STEP 1 — SETUP (everyone does this once)
+  git clone https://github.com/<org>/Eventura.git
+  cd Eventura
+  git fetch origin
+  git switch dev
+  git pull origin dev
+
+STEP 2 — WORKING ON YOUR MODULE BRANCH (repeat for each commit)
+  git switch module/<your-branch>
+  # make your changes...
+  git add .
+  GIT_AUTHOR_DATE="2026-03-01 10:00:00" \
+  GIT_COMMITTER_DATE="2026-03-01 10:00:00" \
+  git commit -m "your commit message here"
+  git push origin module/<your-branch>
+
+STEP 3 — PUSHING TO DEV (after all your commits are done)
+  git switch dev
+  git pull origin dev
+  GIT_AUTHOR_DATE="2026-03-02 11:00:00" \
+  GIT_COMMITTER_DATE="2026-03-02 11:00:00" \
+  git merge module/<your-branch> --no-ff -m "merge(<branch>): your merge message"
+  git push origin dev
+
+STEP 4 — FINAL RELEASE TO MAIN (Harsith does this last)
+  git switch main
+  git pull origin main
+  GIT_AUTHOR_DATE="2026-03-08 18:00:00" \
+  GIT_COMMITTER_DATE="2026-03-08 18:00:00" \
+  git merge dev --no-ff -m "release: merge dev into main, Eventura v1.0"
+  git push origin main
+
+===================================
+COMPLETE TIMELINE — EVERY COMMIT WITH EXACT TIMESTAMP
+Read top to bottom like building a building: lay concrete first, then walls, then each floor.
+Team works in parallel where possible. Pull from dev only when you need something from it.
+Commits 1–3 already done by Harsith before this plan started.
+===================================
+
+  FORMAT:
+    [DATE  TIME]  PERSON      #entry  →  commit message
+    GIT_AUTHOR_DATE="YYYY-MM-DD HH:MM:SS" GIT_COMMITTER_DATE="YYYY-MM-DD HH:MM:SS" git commit -m "message"
+
+  PERSONS: H = Harsith · N = Naren · S = Shree · K = Kabhilesh · V = Vandhan
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 1 · Mar 01 · GROUND FLOOR — Harsith lays the concrete slab (schema + JWT)
+                 (commits 1–3 already done; continuing from #4)
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 01  10:00]  H  #04  →  db: finalized schema with Bookmark, Attendance, AdminRequest and all enums
+                 GIT_AUTHOR_DATE="2026-03-01 10:00:00" GIT_COMMITTER_DATE="2026-03-01 10:00:00"
+                 git commit -m "db: finalized schema with Bookmark, Attendance, AdminRequest and all enums"
+
+[Mar 01  12:00]  H  #05  →  auth: added JWT generation and verification helpers in lib/auth.ts
+                 GIT_AUTHOR_DATE="2026-03-01 12:00:00" GIT_COMMITTER_DATE="2026-03-01 12:00:00"
+                 git commit -m "auth: added JWT generation and verification helpers in lib/auth.ts"
+
+[Mar 01  14:30]  H  #06  →  auth: added bcrypt password hash and compare utils
+                 GIT_AUTHOR_DATE="2026-03-01 14:30:00" GIT_COMMITTER_DATE="2026-03-01 14:30:00"
+                 git commit -m "auth: added bcrypt password hash and compare utils"
+
+[Mar 01  16:30]  H  #07  →  auth: built POST /api/auth/login route with JWT cookie
+                 GIT_AUTHOR_DATE="2026-03-01 16:30:00" GIT_COMMITTER_DATE="2026-03-01 16:30:00"
+                 git commit -m "auth: built POST /api/auth/login route with JWT cookie"
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 2 · Mar 02 · 1ST FLOOR — Auth backend rises; four teams start their walls in parallel
+                 H finishes auth backend · N S K V scaffold their UIs (no backend deps yet)
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 02  09:00]  H  #08  →  auth: built POST /api/auth/register route with USER and ORGANIZER role logic
+                 GIT_AUTHOR_DATE="2026-03-02 09:00:00" GIT_COMMITTER_DATE="2026-03-02 09:00:00"
+                 git commit -m "auth: built POST /api/auth/register route with USER and ORGANIZER role logic"
+
+[Mar 02  09:00]  N  #18  →  feat: scaffolded student registration page UI with multi-field form layout
+                 GIT_AUTHOR_DATE="2026-03-02 09:00:00" GIT_COMMITTER_DATE="2026-03-02 09:00:00"
+                 git commit -m "feat: scaffolded student registration page UI with multi-field form layout"
+
+[Mar 02  09:15]  S  #29  →  feat: scaffolded create event page with three-step section layout and stepper UI
+                 GIT_AUTHOR_DATE="2026-03-02 09:15:00" GIT_COMMITTER_DATE="2026-03-02 09:15:00"
+                 git commit -m "feat: scaffolded create event page with three-step section layout and stepper UI"
+
+[Mar 02  09:30]  K  #40  →  feat: scaffolded student dashboard with registered events list and quick stats
+                 GIT_AUTHOR_DATE="2026-03-02 09:30:00" GIT_COMMITTER_DATE="2026-03-02 09:30:00"
+                 git commit -m "feat: scaffolded student dashboard with registered events list and quick stats"
+
+[Mar 02  09:45]  V  #51  →  feat: built browse events page with event card grid layout
+                 GIT_AUTHOR_DATE="2026-03-02 09:45:00" GIT_COMMITTER_DATE="2026-03-02 09:45:00"
+                 git commit -m "feat: built browse events page with event card grid layout"
+
+[Mar 02  10:30]  H  #09  →  auth: added GET /api/auth/me and POST /api/auth/logout routes
+                 GIT_AUTHOR_DATE="2026-03-02 10:30:00" GIT_COMMITTER_DATE="2026-03-02 10:30:00"
+                 git commit -m "auth: added GET /api/auth/me and POST /api/auth/logout routes"
+
+[Mar 02  11:00]  N  #19  →  feat: built complete-profile page with college dropdown, branch, year, and photo upload
+                 GIT_AUTHOR_DATE="2026-03-02 11:00:00" GIT_COMMITTER_DATE="2026-03-02 11:00:00"
+                 git commit -m "feat: built complete-profile page with college dropdown, branch, year, and photo upload"
+
+[Mar 02  11:15]  S  #30  →  feat: built event info section with poster upload, title, description, date and time fields
+                 GIT_AUTHOR_DATE="2026-03-02 11:15:00" GIT_COMMITTER_DATE="2026-03-02 11:15:00"
+                 git commit -m "feat: built event info section with poster upload, title, description, date and time fields"
+
+[Mar 02  11:30]  K  #41  →  feat: built organizer dashboard with my events summary and create event shortcut
+                 GIT_AUTHOR_DATE="2026-03-02 11:30:00" GIT_COMMITTER_DATE="2026-03-02 11:30:00"
+                 git commit -m "feat: built organizer dashboard with my events summary and create event shortcut"
+
+[Mar 02  11:45]  V  #52  →  feat: added search bar, filter by college, and sort by date and popularity to browse page
+                 GIT_AUTHOR_DATE="2026-03-02 11:45:00" GIT_COMMITTER_DATE="2026-03-02 11:45:00"
+                 git commit -m "feat: added search bar, filter by college, and sort by date and popularity to browse page"
+
+[Mar 02  12:30]  H  #10  →  auth: added middleware with role-based route protection and redirect rules
+                 GIT_AUTHOR_DATE="2026-03-02 12:30:00" GIT_COMMITTER_DATE="2026-03-02 12:30:00"
+                 git commit -m "auth: added middleware with role-based route protection and redirect rules"
+
+[Mar 02  13:15]  N  #20  →  feat: added ProfileCameraModal component for live camera photo capture
+                 GIT_AUTHOR_DATE="2026-03-02 13:15:00" GIT_COMMITTER_DATE="2026-03-02 13:15:00"
+                 git commit -m "feat: added ProfileCameraModal component for live camera photo capture"
+
+[Mar 02  13:30]  S  #31  →  feat: added venue, capacity, visibility selector, tags and paid event toggle
+                 GIT_AUTHOR_DATE="2026-03-02 13:30:00" GIT_COMMITTER_DATE="2026-03-02 13:30:00"
+                 git commit -m "feat: added venue, capacity, visibility selector, tags and paid event toggle"
+
+[Mar 02  13:45]  K  #42  →  feat: scaffolded admin dashboard with organizer request list and approve actions
+                 GIT_AUTHOR_DATE="2026-03-02 13:45:00" GIT_COMMITTER_DATE="2026-03-02 13:45:00"
+                 git commit -m "feat: scaffolded admin dashboard with organizer request list and approve actions"
+
+[Mar 02  14:00]  V  #53  →  feat: built EventPreviewCard component with banner, title, date, venue and registration count
+                 GIT_AUTHOR_DATE="2026-03-02 14:00:00" GIT_COMMITTER_DATE="2026-03-02 14:00:00"
+                 git commit -m "feat: built EventPreviewCard component with banner, title, date, venue and registration count"
+
+[Mar 02  14:30]  H  #11  →  auth: built superadmin hardcoded login at /api/auth/superadmin/login
+                 GIT_AUTHOR_DATE="2026-03-02 14:30:00" GIT_COMMITTER_DATE="2026-03-02 14:30:00"
+                 git commit -m "auth: built superadmin hardcoded login at /api/auth/superadmin/login"
+
+[Mar 02  15:30]  H  #12  →  auth: added organizer request and admin request access API routes
+                 GIT_AUTHOR_DATE="2026-03-02 15:30:00" GIT_COMMITTER_DATE="2026-03-02 15:30:00"
+                 git commit -m "auth: added organizer request and admin request access API routes"
+
+[Mar 02  16:30]  H  #13  →  auth: set up nodemailer email config and approval + request email functions
+                 GIT_AUTHOR_DATE="2026-03-02 16:30:00" GIT_COMMITTER_DATE="2026-03-02 16:30:00"
+                 git commit -m "auth: set up nodemailer email config and approval + request email functions"
+
+[Mar 02  17:30]  H  #14  →  feat: built home page layout with hero section and event preview strip
+                 GIT_AUTHOR_DATE="2026-03-02 17:30:00" GIT_COMMITTER_DATE="2026-03-02 17:30:00"
+                 git commit -m "feat: built home page layout with hero section and event preview strip"
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 3 · Mar 03 · 2ND FLOOR — Harsith seals the auth floor; others pull dev and start APIs
+                 H finishes UI pages and pushes dev @ 11:00
+                 N S K V pull dev then wire their backend routes alongside UI
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 03  09:00]  H  #15  →  feat: built login page UI and register page UI with role toggle
+                 GIT_AUTHOR_DATE="2026-03-03 09:00:00" GIT_COMMITTER_DATE="2026-03-03 09:00:00"
+                 git commit -m "feat: built login page UI and register page UI with role toggle"
+
+[Mar 03  10:00]  H  #16  →  feat: built superadmin login page, organizer request flow UI, and navbar with auth state
+                 GIT_AUTHOR_DATE="2026-03-03 10:00:00" GIT_COMMITTER_DATE="2026-03-03 10:00:00"
+                 git commit -m "feat: built superadmin login page, organizer request flow UI, and navbar with auth state"
+
+[Mar 03  11:00]  H  #17  →  PUSH DEV — merge(auth): full authentication layer and project foundation complete
+                 git switch dev && git pull origin dev
+                 GIT_AUTHOR_DATE="2026-03-03 11:00:00" GIT_COMMITTER_DATE="2026-03-03 11:00:00"
+                 git merge module/auth --no-ff -m "merge(auth): full authentication layer and project foundation complete"
+                 git push origin dev
+
+                 ↓ N S K V each run this before continuing ↓
+                 git switch module/<your-branch> && git pull origin dev
+
+[Mar 03  11:30]  N  #21  →  api: built POST /api/profile/complete route to save profile data
+                 GIT_AUTHOR_DATE="2026-03-03 11:30:00" GIT_COMMITTER_DATE="2026-03-03 11:30:00"
+                 git commit -m "api: built POST /api/profile/complete route to save profile data"
+
+[Mar 03  11:30]  S  #32  →  api: built POST /api/events route for new event creation with full payload
+                 GIT_AUTHOR_DATE="2026-03-03 11:30:00" GIT_COMMITTER_DATE="2026-03-03 11:30:00"
+                 git commit -m "api: built POST /api/events route for new event creation with full payload"
+
+[Mar 03  11:45]  K  #43  →  feat: built superadmin dashboard with admin request table and approval controls
+                 GIT_AUTHOR_DATE="2026-03-03 11:45:00" GIT_COMMITTER_DATE="2026-03-03 11:45:00"
+                 git commit -m "feat: built superadmin dashboard with admin request table and approval controls"
+
+[Mar 03  11:45]  V  #54  →  feat: built full event detail page with description, organizer info, tags and register CTA
+                 GIT_AUTHOR_DATE="2026-03-03 11:45:00" GIT_COMMITTER_DATE="2026-03-03 11:45:00"
+                 git commit -m "feat: built full event detail page with description, organizer info, tags and register CTA"
+
+[Mar 03  12:30]  N  #22  →  api: built GET and POST /api/auth/profile routes for profile prefill
+                 GIT_AUTHOR_DATE="2026-03-03 12:30:00" GIT_COMMITTER_DATE="2026-03-03 12:30:00"
+                 git commit -m "api: built GET and POST /api/auth/profile routes for profile prefill"
+
+[Mar 03  12:45]  S  #33  →  feat: added registration mode section with website vs google form toggle
+                 GIT_AUTHOR_DATE="2026-03-03 12:45:00" GIT_COMMITTER_DATE="2026-03-03 12:45:00"
+                 git commit -m "feat: added registration mode section with website vs google form toggle"
+
+[Mar 03  13:00]  K  #44  →  api: built GET /api/admin/requests route and POST approve/reject organizer request
+                 GIT_AUTHOR_DATE="2026-03-03 13:00:00" GIT_COMMITTER_DATE="2026-03-03 13:00:00"
+                 git commit -m "api: built GET /api/admin/requests route and POST approve/reject organizer request"
+
+[Mar 03  13:15]  V  #55  →  api: built GET /api/events with filters and GET /api/events/[id] route with registrations count
+                 GIT_AUTHOR_DATE="2026-03-03 13:15:00" GIT_COMMITTER_DATE="2026-03-03 13:15:00"
+                 git commit -m "api: built GET /api/events with filters and GET /api/events/[id] route with registrations count"
+
+[Mar 03  14:00]  N  #23  →  feat: built attendance page with full registrations list and status badges
+                 GIT_AUTHOR_DATE="2026-03-03 14:00:00" GIT_COMMITTER_DATE="2026-03-03 14:00:00"
+                 git commit -m "feat: built attendance page with full registrations list and status badges"
+
+[Mar 03  14:15]  S  #34  →  feat: built custom registration fields builder with add, remove, type and required controls
+                 GIT_AUTHOR_DATE="2026-03-03 14:15:00" GIT_COMMITTER_DATE="2026-03-03 14:15:00"
+                 git commit -m "feat: built custom registration fields builder with add, remove, type and required controls"
+
+[Mar 03  14:30]  K  #45  →  api: built GET /api/admin/users and GET /api/admin/organisers routes for admin views
+                 GIT_AUTHOR_DATE="2026-03-03 14:30:00" GIT_COMMITTER_DATE="2026-03-03 14:30:00"
+                 git commit -m "api: built GET /api/admin/users and GET /api/admin/organisers routes for admin views"
+
+[Mar 03  14:45]  V  #56  →  feat: built profile page with view mode and edit mode for personal and academic info
+                 GIT_AUTHOR_DATE="2026-03-03 14:45:00" GIT_COMMITTER_DATE="2026-03-03 14:45:00"
+                 git commit -m "feat: built profile page with view mode and edit mode for personal and academic info"
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 4 · Mar 04 · 3RD FLOOR — APIs wired up, features connected end-to-end
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 04  09:00]  N  #24  →  feat: added QR code display popup and attendance mark button on event page
+                 GIT_AUTHOR_DATE="2026-03-04 09:00:00" GIT_COMMITTER_DATE="2026-03-04 09:00:00"
+                 git commit -m "feat: added QR code display popup and attendance mark button on event page"
+
+[Mar 04  09:15]  S  #35  →  feat: built edit event flow with full prefill from existing event data via edit param
+                 GIT_AUTHOR_DATE="2026-03-04 09:15:00" GIT_COMMITTER_DATE="2026-03-04 09:15:00"
+                 git commit -m "feat: built edit event flow with full prefill from existing event data via edit param"
+
+[Mar 04  09:30]  K  #46  →  api: built GET /api/admin/stats for total counts of users, events, requests, colleges
+                 GIT_AUTHOR_DATE="2026-03-04 09:30:00" GIT_COMMITTER_DATE="2026-03-04 09:30:00"
+                 git commit -m "api: built GET /api/admin/stats for total counts of users, events, requests, colleges"
+
+[Mar 04  09:45]  V  #57  →  feat: built bookmarks page with saved events list and unsave functionality
+                 GIT_AUTHOR_DATE="2026-03-04 09:45:00" GIT_COMMITTER_DATE="2026-03-04 09:45:00"
+                 git commit -m "feat: built bookmarks page with saved events list and unsave functionality"
+
+[Mar 04  10:30]  N  #25  →  api: built POST /api/events/[id]/attendance/mark and GET /api/events/[id]/verify-attendance routes
+                 GIT_AUTHOR_DATE="2026-03-04 10:30:00" GIT_COMMITTER_DATE="2026-03-04 10:30:00"
+                 git commit -m "api: built POST /api/events/[id]/attendance/mark and GET /api/events/[id]/verify-attendance routes"
+
+[Mar 04  10:45]  S  #36  →  api: built PUT /api/events/[id] for event update and DELETE for event removal
+                 GIT_AUTHOR_DATE="2026-03-04 10:45:00" GIT_COMMITTER_DATE="2026-03-04 10:45:00"
+                 git commit -m "api: built PUT /api/events/[id] for event update and DELETE for event removal"
+
+[Mar 04  11:00]  K  #47  →  feat: built contact-admin page, organizer status page, and waiting-for-approval page
+                 GIT_AUTHOR_DATE="2026-03-04 11:00:00" GIT_COMMITTER_DATE="2026-03-04 11:00:00"
+                 git commit -m "feat: built contact-admin page, organizer status page, and waiting-for-approval page"
+
+[Mar 04  11:15]  V  #58  →  api: built GET and POST /api/bookmarks and POST /api/events/[id]/bookmark toggle route
+                 GIT_AUTHOR_DATE="2026-03-04 11:15:00" GIT_COMMITTER_DATE="2026-03-04 11:15:00"
+                 git commit -m "api: built GET and POST /api/bookmarks and POST /api/events/[id]/bookmark toggle route"
+
+[Mar 04  12:00]  N  #26  →  api: built GET /api/registrations route to fetch student registered events
+                 GIT_AUTHOR_DATE="2026-03-04 12:00:00" GIT_COMMITTER_DATE="2026-03-04 12:00:00"
+                 git commit -m "api: built GET /api/registrations route to fetch student registered events"
+
+[Mar 04  12:15]  S  #37  →  feat: built organizer my-events page with search, sort, and event card list
+                 GIT_AUTHOR_DATE="2026-03-04 12:15:00" GIT_COMMITTER_DATE="2026-03-04 12:15:00"
+                 git commit -m "feat: built organizer my-events page with search, sort, and event card list"
+
+[Mar 04  12:30]  K  #48  →  feat: built request-rejected page with reason display and re-apply option
+                 GIT_AUTHOR_DATE="2026-03-04 12:30:00" GIT_COMMITTER_DATE="2026-03-04 12:30:00"
+                 git commit -m "feat: built request-rejected page with reason display and re-apply option"
+
+[Mar 04  12:45]  V  #59  →  feat: built settings page with password change form and account deletion modal
+                 GIT_AUTHOR_DATE="2026-03-04 12:45:00" GIT_COMMITTER_DATE="2026-03-04 12:45:00"
+                 git commit -m "feat: built settings page with password change form and account deletion modal"
+
+[Mar 04  13:30]  N  #27  →  feat: wired registration success email trigger in registration service after confirmed registration
+                 GIT_AUTHOR_DATE="2026-03-04 13:30:00" GIT_COMMITTER_DATE="2026-03-04 13:30:00"
+                 git commit -m "feat: wired registration success email trigger in registration service after confirmed registration"
+
+[Mar 04  13:45]  S  #38  →  api: built POST /api/events/[id]/live to toggle event live state and GET /api/events/mine
+                 GIT_AUTHOR_DATE="2026-03-04 13:45:00" GIT_COMMITTER_DATE="2026-03-04 13:45:00"
+                 git commit -m "api: built POST /api/events/[id]/live to toggle event live state and GET /api/events/mine"
+
+[Mar 04  14:00]  K  #49  →  feat: built admin organizer management page with approve, reject, and status toggle
+                 GIT_AUTHOR_DATE="2026-03-04 14:00:00" GIT_COMMITTER_DATE="2026-03-04 14:00:00"
+                 git commit -m "feat: built admin organizer management page with approve, reject, and status toggle"
+
+[Mar 04  14:15]  V  #60  →  api: built POST /api/auth/change-password and DELETE /api/auth/delete-account routes
+                 GIT_AUTHOR_DATE="2026-03-04 14:15:00" GIT_COMMITTER_DATE="2026-03-04 14:15:00"
+                 git commit -m "api: built POST /api/auth/change-password and DELETE /api/auth/delete-account routes"
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 5 · Mar 05 · ROOF SLAB — Each wing seals off, modules merged into dev
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 05  09:00]  N  #28  →  PUSH DEV — merge(user-registration): registration, attendance, and profile completion live
+                 git switch dev && git pull origin dev
+                 GIT_AUTHOR_DATE="2026-03-05 09:00:00" GIT_COMMITTER_DATE="2026-03-05 09:00:00"
+                 git merge module/user-registration --no-ff -m "merge(user-registration): registration, attendance, and profile completion live"
+                 git push origin dev
+
+[Mar 05  09:30]  S  #39  →  PUSH DEV — merge(create-event): full event creation, editing, and organizer tools live
+                 git switch dev && git pull origin dev
+                 GIT_AUTHOR_DATE="2026-03-05 09:30:00" GIT_COMMITTER_DATE="2026-03-05 09:30:00"
+                 git merge module/create-event --no-ff -m "merge(create-event): full event creation, editing, and organizer tools live"
+                 git push origin dev
+
+[Mar 05  10:00]  K  #50  →  PUSH DEV — merge(dashboard): all dashboards and admin control pages live
+                 git switch dev && git pull origin dev
+                 GIT_AUTHOR_DATE="2026-03-05 10:00:00" GIT_COMMITTER_DATE="2026-03-05 10:00:00"
+                 git merge module/dashboard --no-ff -m "merge(dashboard): all dashboards and admin control pages live"
+                 git push origin dev
+
+[Mar 05  10:30]  V  #61  →  PUSH DEV — merge(explore-events): browse, profile, bookmarks, and settings live
+                 git switch dev && git pull origin dev
+                 GIT_AUTHOR_DATE="2026-03-05 10:30:00" GIT_COMMITTER_DATE="2026-03-05 10:30:00"
+                 git merge module/explore-events --no-ff -m "merge(explore-events): browse, profile, bookmarks, and settings live"
+                 git push origin dev
+
+───────────────────────────────────────────────────────────────────────────────
+DAY 6 · Mar 06 · INAUGURATION — Harsith cuts the ribbon, building opens to the public
+───────────────────────────────────────────────────────────────────────────────
+
+[Mar 06  14:00]  H  #62  →  PUSH MAIN — release: merge dev into main, Eventura v1.0
+                 git switch main && git pull origin main
+                 GIT_AUTHOR_DATE="2026-03-06 14:00:00" GIT_COMMITTER_DATE="2026-03-06 14:00:00"
+                 git merge dev --no-ff -m "release: merge dev into main, Eventura v1.0"
+                 git push origin main
+
+───────────────────────────────────────────────────────────────────────────────
+
+===================================
+VERIFY YOUR GRAPH ANYTIME
+===================================
+  git log --graph --oneline --decorate --all
