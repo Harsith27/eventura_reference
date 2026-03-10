@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import type { AppUser } from '@/lib/app-types';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import type { AppUser } from '@/types';
 
 export default function Home() {
   const [user, setUser] = useState<AppUser | null>(null);

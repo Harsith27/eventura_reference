@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import type { AppUser, CollegeOption } from '@/lib/app-types';
-import type { OrganizerRequest, AdminDashboardUser } from '@/lib/admin-types';
-import type { AdminEventSummary } from '@/lib/event-types';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import type { AppUser, CollegeOption } from '@/types';
+import type { OrganizerRequest, AdminDashboardUser } from '@/types';
+import type { AdminEventSummary } from '@/types';
 
 export default function AdminDashboard() {
   const router = useRouter();

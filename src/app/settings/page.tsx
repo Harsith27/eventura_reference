@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import type { AppUser } from '@/lib/app-types';
+import Navbar from '@/components/layout/Navbar';
+import type { AppUser } from '@/types';
 
 export default function SettingsPage() {
   const router = useRouter();

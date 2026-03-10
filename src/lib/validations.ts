@@ -44,13 +44,6 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const createOrganiserSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  collegeId: z.string().uuid("Invalid college ID"),
-  profileImageUrl: z.string().url("Invalid image URL"),
-});
-
 // Event Schemas
 export const createEventSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),

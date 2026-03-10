@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
           email: true,
           firstName: true,
           lastName: true,
-          isActive: true,
           createdAt: true,
           college: {
             select: {

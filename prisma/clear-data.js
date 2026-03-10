@@ -9,10 +9,6 @@ async function clearData() {
     // Delete in order respecting foreign key constraints
     // Delete child records first, then parent records
 
-    console.log('Deleting notifications...');
-    const notifications = await prisma.notification.deleteMany({});
-    console.log(`✓ Deleted ${notifications.count} notifications`);
-
     console.log('Deleting bookmarks...');
     const bookmarks = await prisma.bookmark.deleteMany({});
     console.log(`✓ Deleted ${bookmarks.count} bookmarks`);

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Footer from '@/components/Footer';
+import Footer from '@/components/layout/Footer';
 import { cn } from '@/lib/utils';
 
 interface HeaderAction {

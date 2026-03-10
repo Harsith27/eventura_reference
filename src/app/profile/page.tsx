@@ -4,18 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createPortal } from 'react-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import type { AppUser, ProfileInfo } from '@/lib/app-types';
-
-function ProfileAvatarFallback({ className = 'h-16 w-16' }: { className?: string }) {
-  return (
-    <svg className={`${className} text-white/80`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M4.5 20.25a7.5 7.5 0 0115 0" />
-    </svg>
-  );
-}
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import type { AppUser, ProfileInfo } from '@/types';
+import ProfileAvatarFallback from '@/components/profile/ProfileAvatarFallback';
 
 const BRANCHES = [
   { value: 'CSE', label: 'Computer Science Engineering' },

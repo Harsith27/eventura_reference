@@ -110,7 +110,6 @@ Open [http://localhost:3000](http://localhost:3000) to see the landing page.
 - **Event**: Title, description, dates, location, capacity, status
 - **Registration**: User-Event link with QR code and attendance status
 - **Bookmark**: User-Event bookmark/favorite
-- **Notification**: User notifications for event updates
 - **ContactMessage**: Contact form submissions
 
 ## 🎯 API Endpoints
@@ -140,17 +139,10 @@ Open [http://localhost:3000](http://localhost:3000) to see the landing page.
 - `POST /api/events/[id]/bookmark` - Toggle bookmark
 - `GET /api/bookmarks` - Get user's bookmarked events
 
-### Notifications (Protected)
-- `GET /api/notifications` - Get user's notifications (supports pagination & unread filter)
-- `PUT /api/notifications` - Mark all notifications as read
-- `PUT /api/notifications/[id]` - Mark single notification as read
-- `DELETE /api/notifications/[id]` - Delete notification
-
 ## 🚧 Next Steps
 
 ### Completed ✅
 - [x] **Registration Service**: User event registration with QR code generation
-- [x] **Notification Service**: In-app notifications
 - [x] **QR Scanner**: Attendance verification system
 - [x] **Bookmark API**: Save/unsave events
 

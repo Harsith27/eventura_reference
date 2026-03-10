@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import Footer from '@/components/Footer';
-import type { AdminRequest, AdminUser } from '@/lib/admin-types';
+import Footer from '@/components/layout/Footer';
+import type { AdminRequest, AdminUser } from '@/types';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();

@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import EventPreviewCard from '@/components/EventPreviewCard';
-import type { AppUser } from '@/lib/app-types';
-import type { BrowseEvent } from '@/lib/event-types';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import EventPreviewCard from '@/components/layout/EventPreviewCard';
+import type { AppUser } from '@/types';
+import type { BrowseEvent } from '@/types';
 
 export default function BrowseEventsPage() {
   const [user, setUser] = useState<AppUser | null>(null);

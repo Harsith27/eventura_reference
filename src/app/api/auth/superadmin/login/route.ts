@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { loginSuperadmin } from "@/services/user.service";
+import { loginSuperadmin } from "@/services/auth.service";
 import { superadminLoginSchema } from "@/lib/validations";
 import { setAuthCookie } from "@/lib/auth";
 

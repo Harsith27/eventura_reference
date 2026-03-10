@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendEventRegistrationSuccessEmail } from "@/lib/email";
 import crypto from "crypto";
 
 /**
@@ -67,6 +68,8 @@ export async function registerForEvent(
     },
   });
 
+
+  await sendEventRegistrationSuccessEmail(registration.user.email, event.title);
 
   return registration;
 }

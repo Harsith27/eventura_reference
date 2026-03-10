@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginSchema } from "@/lib/validations";
-import { loginUser } from "@/services/user.service";
+import { loginUser } from "@/services/auth.service";
 import { setAuthCookie } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {

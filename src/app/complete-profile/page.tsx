@@ -4,26 +4,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createPortal } from 'react-dom';
-import Footer from '@/components/Footer';
-
-const BRANCHES = [
-  { value: 'CSE', label: 'Computer Science Engineering' },
-  { value: 'ECE', label: 'Electronics & Communication Engineering' },
-  { value: 'EEE', label: 'Electrical & Electronics Engineering' },
-  { value: 'MECH', label: 'Mechanical Engineering' },
-  { value: 'CIVIL', label: 'Civil Engineering' },
-  { value: 'IT', label: 'Information Technology' },
-  { value: 'AIDS', label: 'Artificial Intelligence & Data Science' },
-  { value: 'AIML', label: 'Artificial Intelligence & Machine Learning' },
-  { value: 'BBA', label: 'Bachelor of Business Administration' },
-  { value: 'BCA', label: 'Bachelor of Computer Applications' },
-  { value: 'MBA', label: 'Master of Business Administration' },
-  { value: 'MCA', label: 'Master of Computer Applications' },
-  { value: 'OTHER', label: 'Other' },
-];
-
-const YEARS = [1, 2, 3, 4, 5];
+import Footer from '@/components/layout/Footer';
+import ProfileCameraModal from '@/components/profile/ProfileCameraModal';
+import { PROFILE_BRANCHES, PROFILE_YEARS } from '@/lib/profile-form-options';
 
 export default function CompleteProfilePage() {
   const router = useRouter();
@@ -33,13 +16,11 @@ export default function CompleteProfilePage() {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraPermission, setCameraPermission] = useState<'granted' | 'denied' | 'prompt' | null>(null);
   const [cameraLoading, setCameraLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [colleges, setColleges] = useState<Array<{ id: string; name: string }>>([]);
   const [collegesLoading, setCollegesLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -363,6 +344,7 @@ export default function CompleteProfilePage() {
   }
 
   return (
+    <>
       <div className="min-h-screen bg-black text-white overflow-visible flex flex-col">
         {/* Header */}
         <header className="sticky top-4 z-40">
@@ -562,7 +544,7 @@ export default function CompleteProfilePage() {
                       onChange={handleChange}
                       className="w-full rounded-xl border border-white/10 bg-black px-4 py-2.5 text-white focus:border-neon focus:outline-none focus:ring-2 focus:ring-neon/20 [&>option]:bg-[#0a0a0a] [&>option]:text-white"
                     >
-                      {YEARS.map((year) => (
+                      {PROFILE_YEARS.map((year) => (
                         <option key={year} value={year}>
                           Year {year}
                         </option>
@@ -583,7 +565,7 @@ export default function CompleteProfilePage() {
                       className="w-full rounded-xl border border-white/10 bg-black px-4 py-2.5 text-white focus:border-neon focus:outline-none focus:ring-2 focus:ring-neon/20 [&>option]:bg-[#0a0a0a] [&>option]:text-white"
                     >
                       <option value="">Select Branch</option>
-                      {BRANCHES.map((branch) => (
+                      {PROFILE_BRANCHES.map((branch) => (
                         <option key={branch.value} value={branch.value}>
                           {branch.label}
                         </option>
@@ -732,15 +714,6 @@ export default function CompleteProfilePage() {
                   onChange={handleImageSelect}
                   className="hidden"
                 />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-
                 {/* Hidden Canvas for capturing */}
                 <canvas ref={canvasRef} className="hidden" />
 
@@ -761,136 +734,14 @@ export default function CompleteProfilePage() {
         </div>
       </main>
     </div>
-
-    {/* Camera Modal - Using Portal to render outside DOM hierarchy */}
-    {isMounted && cameraOpen && createPortal(
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 99999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: '16px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '700px',
-          height: '500px',
-          borderRadius: '24px',
-          backgroundColor: '#0a0a0a',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {/* Video Stream Container */}
-          <div style={{
-            position: 'relative',
-            backgroundColor: 'black',
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover'
-              }}
-            />
-
-            {/* Capture Overlay - Simple frame guide */}
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              pointerEvents: 'none'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '32px',
-                left: '32px',
-                right: '32px',
-                bottom: '32px',
-                border: '2px solid rgba(255, 255, 255, 0.4)',
-                borderRadius: '24px'
-              }} />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            padding: '16px',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
-          }}>
-            <button
-              onClick={stopCamera}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              type="button"
-              style={{
-                flex: 1,
-                padding: '12px 20px',
-                borderRadius: '999px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                backgroundColor: 'transparent',
-                color: '#fff',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={capturePhoto}
-              onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
-              type="button"
-              style={{
-                flex: 1,
-                padding: '12px 20px',
-                borderRadius: '999px',
-                border: 'none',
-                background: 'linear-gradient(90deg, rgb(236 72 153), rgb(239 68 68), rgb(249 115 22))',
-                color: '#fff',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <svg style={{ width: '20px', height: '20px' }} fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="8" />
-              </svg>
-              Capture
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body
-    )}
-    
-        <Footer />
+      <ProfileCameraModal
+        isMounted={isMounted}
+        isOpen={cameraOpen}
+        videoRef={videoRef}
+        onCancel={stopCamera}
+        onCapture={capturePhoto}
+      />
+      <Footer />
+    </>
   );
 }

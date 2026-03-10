@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import EventPreviewCard from '@/components/EventPreviewCard';
-import type { AppUser } from '@/lib/app-types';
-import type { OrganizedEvent } from '@/lib/event-types';
+import Link from 'next/link';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import EventPreviewCard from '@/components/layout/EventPreviewCard';
+import type { AppUser } from '@/types';
+import type { OrganizedEvent } from '@/types';
 
 export default function OrganizerMyEventsPage() {
   const router = useRouter();

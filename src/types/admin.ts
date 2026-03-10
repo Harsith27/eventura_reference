@@ -12,7 +12,6 @@ export interface AdminUser {
   email: string;
   firstName: string;
   lastName: string;
-  isActive: boolean;
   createdAt: string;
   college?: {
     name: string;

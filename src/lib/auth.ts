@@ -3,6 +3,7 @@ import type { JWTPayload as JoseJWTPayload } from "jose";
 import bcryptjs from "bcryptjs";
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { buildSuperadminUser, SUPERADMIN_USER_ID } from "./superadmin";
 
 // JWT Configuration
 const JWT_SECRET = new TextEncoder().encode(
@@ -24,9 +25,9 @@ export interface JWTPayload extends JoseJWTPayload {
 export interface AuthUser {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
   role: "SUPERADMIN" | "ADMIN" | "ORGANIZER" | "USER";
   status: "ACTIVE" | "PENDING" | "REJECTED" | "SUSPENDED";
   profileImage?: string | null;
@@ -87,19 +88,8 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     }
 
     // Handle SUPERADMIN (hardcoded, not in DB)
-    if (payload.userId === "SUPERADMIN" && payload.role === "SUPERADMIN") {
-      return {
-        id: "SUPERADMIN",
-        email: payload.email,
-        firstName: "Super",
-        lastName: "Admin",
-        name: "SUPERADMIN",
-        role: "SUPERADMIN" as const,
-        status: "ACTIVE" as const,
-        profileImage: "",
-        collegeId: null,
-        isProfileComplete: true,
-      };
+    if (payload.userId === SUPERADMIN_USER_ID && payload.role === "SUPERADMIN") {
+      return buildSuperadminUser(payload.email) as AuthUser;
     }
 
     // Fetch fresh user from DB to prevent stale data

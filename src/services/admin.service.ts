@@ -118,8 +118,6 @@ export async function createAdminFromRequest(
       lastName: request.collegeName,
       role: "ADMIN",
       collegeId: college.id,
-      emailVerified: false,
-      isActive: true,
     },
   });
 

@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import type { AppUser } from '@/lib/app-types';
+import Navbar from '@/components/layout/Navbar';
+import type { AppUser } from '@/types';
 
 interface Event {
   id: string;

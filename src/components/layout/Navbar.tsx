@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import type { AppUser } from '@/lib/app-types';
+import type { AppUser } from '@/types';
 
 interface NavbarProps {
   user: AppUser;
@@ -25,6 +25,8 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const displayName = user.name || [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email;
+  const avatarAlt = displayName;
 
   const navAliases: Record<string, string[]> = {
     '/dashboard': [
@@ -36,7 +38,6 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
     '/superadmin/dashboard': ['/superadmin', '/superadmin/dashboard'],
     '/events/create': ['/events/create'],
     '/organizer/my-events': ['/organizer/my-events'],
-    '/organizer/scan-attendance': ['/organizer/scan-attendance'],
     '/superadmin/analytics': ['/superadmin/analytics'],
     '/browse': ['/browse'],
   };
@@ -56,7 +57,6 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
       show: (user.role === 'ORGANIZER' && user.status === 'ACTIVE') || user.role === 'ADMIN' || user.role === 'SUPERADMIN',
     },
     { href: '/organizer/my-events', label: 'My Events', show: user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' },
-    { href: '/organizer/scan-attendance', label: 'Scan QR', show: user.role === 'ORGANIZER' || user.role === 'SUPERADMIN' },
     { href: '/superadmin/analytics', label: 'Analytics', show: user.role === 'SUPERADMIN' },
   ];
   const canViewProfile = user.role !== 'ADMIN' && user.role !== 'SUPERADMIN';
@@ -165,7 +165,7 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
                 {user.profileImage ? (
                   <Image
                     src={user.profileImage}
-                    alt={`${user.firstName} ${user.lastName}`}
+                    alt={avatarAlt}
                     width={36}
                     height={36}
                     className="h-full w-full object-cover"
@@ -184,7 +184,7 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
                       {user.profileImage ? (
                         <Image
                           src={user.profileImage}
-                          alt={`${user.firstName} ${user.lastName}`}
+                          alt={avatarAlt}
                           width={40}
                           height={40}
                           className="h-full w-full object-cover"
@@ -195,7 +195,7 @@ export default function Navbar({ user, minimalHome = false }: NavbarProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-white truncate">
-                        {user.firstName} {user.lastName}
+                        {displayName}
                       </p>
                       <p className="text-xs text-muted truncate">{user.email}</p>
                     </div>

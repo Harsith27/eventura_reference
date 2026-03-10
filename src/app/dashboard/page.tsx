@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import EventPreviewCard from '@/components/EventPreviewCard';
-import type { AppUser } from '@/lib/app-types';
-import type { BookmarkItem, EventCardItem, RegisteredItem } from '@/lib/event-types';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import EventPreviewCard from '@/components/layout/EventPreviewCard';
+import type { AppUser } from '@/types';
+import type { BookmarkItem, EventCardItem, RegisteredItem } from '@/types';
 
 export default function Dashboard() {
   const router = useRouter();

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import type { AppUser, ProfileInfo } from '@/lib/app-types';
-import type { CustomField } from '@/lib/event-types';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import type { AppUser, ProfileInfo } from '@/types';
+import type { CustomField } from '@/types';
 
 const DEFAULT_REGISTRATION_FIELDS: CustomField[] = [
   {
